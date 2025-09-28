@@ -4,6 +4,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import Orders from "./pages/admin/Orders";
 import Users from "./pages/admin/Users";
+import AddProduct from "./pages/admin/AddProduct";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="orders" element={<Orders />} />
           <Route path="users" element={<Users />} />
+          <Route path="add-product" element={<AddProduct />} />
         </Route>
       </Routes>
     </Router>
