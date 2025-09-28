@@ -1,0 +1,37 @@
+/* topbar.css */
+.topbar {
+  height: 60px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar h1 {
+  font-size: 1.25rem;
+  color: hsl(54, 87%, 51%);
+}
+
+.topbar .actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.topbar button {
+  background: hsl(54, 87%, 51%);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.topbar button:hover {
+  background: #16213e;
+}
