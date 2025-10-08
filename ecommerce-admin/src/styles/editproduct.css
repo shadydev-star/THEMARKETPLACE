@@ -1,0 +1,206 @@
+.edit-product {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fffbe6;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-product h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.product-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #444;
+}
+
+.product-form input,
+.product-form textarea {
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border 0.2s ease;
+}
+
+.product-form input:focus,
+.product-form textarea:focus {
+  border-color: #f4c400;
+  outline: none;
+}
+
+.product-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Variants Section */
+.variants-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px dashed #f4c400;
+}
+
+.variants-section h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.variant-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: flex-start;
+  background: #fff8cc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.variant-row input {
+  flex: 1 1 120px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.variant-row button {
+  background: #ffda00;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.variant-row button:hover {
+  background: #ffd633;
+}
+
+/* Dropzone */
+.dropzone {
+  border: 2px dashed #bbb;
+  border-radius: 10px;
+  padding: 1.2rem;
+  text-align: center;
+  background: #fffdf0;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dropzone.active {
+  border-color: #f4c400;
+  background: #fff8cc;
+}
+
+.dropzone-placeholder {
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.image-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.preview-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preview-img,
+.preview-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-img {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.75);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.reorder-controls {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+}
+
+.reorder-controls button {
+  background: rgba(255, 218, 0, 0.8);
+  border: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Submit Button */
+.product-form > button[type="submit"] {
+  background: #f4c400;
+  color: #333;
+  padding: 0.9rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.product-form > button[type="submit"]:hover {
+  background: #ffd633;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .edit-product {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .variant-row {
+    flex-direction: column;
+  }
+
+  .preview-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+}

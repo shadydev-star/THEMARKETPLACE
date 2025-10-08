@@ -1,26 +1,137 @@
-.action-btn {
-  padding: 0.4rem 0.8rem;
+.orders-page {
+  padding: 20px;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #fff;
+}
+
+.orders-table th,
+.orders-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.orders-table th {
+  background: #efd915;
+}
+
+.orders-table button {
+  padding: 6px 12px;
   border: none;
+  background: #333;
+  color: white;
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 0.5rem;
-  font-size: 0.9rem;
 }
 
-.edit-btn {
-  background: #4caf50;
-  color: white;
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
 }
 
-.edit-btn:hover {
-  background: #45a049;
+.status.pending {
+  background: orange;
+}
+.status.shipped {
+  background: blue;
+}
+.status.delivered {
+  background: green;
 }
 
-.delete-btn {
-  background: #f44336;
-  color: white;
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.delete-btn:hover {
-  background: #da190b;
+.modal {
+  background: #fff;
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.items-table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+.items-table th,
+.items-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.items-table img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.status-btn {
+  background: #efd915;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.orders-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.orders-controls input,
+.orders-controls select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.orders-controls input:focus,
+.orders-controls select:focus {
+  outline: none;
+  border-color: #efd915;
+  box-shadow: 0 0 5px rgba(239, 217, 21, 0.6);
 }

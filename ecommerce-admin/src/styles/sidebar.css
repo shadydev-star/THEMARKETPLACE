@@ -1,11 +1,12 @@
 .sidebar {
   width: 240px;
-  height: 100vh;
-  background: hsl(54, 87%, 51%);
+  height:100vh;
+  background: #efd915;
   color: #fff;
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  position:relative;
 }
 
 .sidebar h2 {
