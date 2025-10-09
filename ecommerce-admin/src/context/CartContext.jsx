@@ -1,30 +1,52 @@
+// src/context/CartContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useCustomerAuth } from "../pages/auth/CustomerAuthContext";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  // Store carts keyed by wholesaler slug: { nike: [...], adidas: [...] }
+  const { currentCustomer } = useCustomerAuth() || {}; // ✅ safe destructuring
   const [carts, setCarts] = useState({});
+  const [showToast, setShowToast] = useState(false); // ✅ animation state
 
-  // ✅ Load from localStorage on app start
+  // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("multiStoreCarts");
-    if (saved) {
-      setCarts(JSON.parse(saved));
-    }
+    if (saved) setCarts(JSON.parse(saved));
   }, []);
 
-  // ✅ Save to localStorage whenever carts change
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("multiStoreCarts", JSON.stringify(carts));
   }, [carts]);
 
-  // 🛒 Add product to a specific store's cart
+  // Load cart from Firestore when customer logs in
+  useEffect(() => {
+    if (!currentCustomer) return;
+    const loadCart = async () => {
+      const ref = doc(db, "customers", currentCustomer.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists() && snap.data().carts) {
+        setCarts((prev) => ({ ...prev, ...snap.data().carts }));
+      }
+    };
+    loadCart();
+  }, [currentCustomer]);
+
+  // Save to Firestore
+  const saveToFirestore = async (updatedCarts) => {
+    if (!currentCustomer) return;
+    const ref = doc(db, "customers", currentCustomer.uid);
+    await setDoc(ref, { carts: updatedCarts }, { merge: true });
+  };
+
+  // ✅ Add to cart with toast
   const addToCart = (slug, product) => {
     setCarts((prev) => {
       const storeCart = prev[slug] || [];
       const existing = storeCart.find((item) => item.id === product.id);
-
       const updated = existing
         ? storeCart.map((item) =>
             item.id === product.id
@@ -33,48 +55,66 @@ export function CartProvider({ children }) {
           )
         : [...storeCart, { ...product, quantity: 1 }];
 
-      return { ...prev, [slug]: updated };
+      const newCarts = { ...prev, [slug]: updated };
+      saveToFirestore(newCarts);
+      return newCarts;
+    });
+
+    // 🔔 Trigger toast animation
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1200);
+  };
+
+  const removeFromCart = (slug, id) => {
+    setCarts((prev) => {
+      const newCarts = {
+        ...prev,
+        [slug]: (prev[slug] || []).filter((item) => item.id !== id),
+      };
+      saveToFirestore(newCarts);
+      return newCarts;
     });
   };
 
-  // ❌ Remove product from a store's cart
-  const removeFromCart = (slug, id) => {
-    setCarts((prev) => ({
-      ...prev,
-      [slug]: prev[slug]?.filter((item) => item.id !== id) || [],
-    }));
-  };
-
-  // 🔄 Update item quantity
   const updateQuantity = (slug, id, qty) => {
     if (qty < 1) return;
-    setCarts((prev) => ({
-      ...prev,
-      [slug]: prev[slug]?.map((item) =>
-        item.id === id ? { ...item, quantity: qty } : item
-      ) || [],
-    }));
+    setCarts((prev) => {
+      const newCarts = {
+        ...prev,
+        [slug]: prev[slug].map((i) =>
+          i.id === id ? { ...i, quantity: qty } : i
+        ),
+      };
+      saveToFirestore(newCarts);
+      return newCarts;
+    });
   };
 
-  // 🧹 Clear a store's cart (useful after checkout)
   const clearCart = (slug) => {
     setCarts((prev) => {
-      const updated = { ...prev };
-      delete updated[slug];
-      return updated;
+      const newCarts = { ...prev };
+      delete newCarts[slug];
+      saveToFirestore(newCarts);
+      return newCarts;
     });
   };
 
   return (
     <CartContext.Provider
-      value={{ carts, addToCart, removeFromCart, updateQuantity, clearCart }}
+      value={{
+        carts,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        showToast, // ✅ include toast flag for Storefront
+      }}
     >
       {children}
     </CartContext.Provider>
   );
 }
 
-// Hook for using cart context
 export function useCart() {
   return useContext(CartContext);
 }

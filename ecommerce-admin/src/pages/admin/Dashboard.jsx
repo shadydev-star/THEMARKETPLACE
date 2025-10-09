@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { db } from "../../firebase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { useParams } from "react-router-dom";
+import { FaCopy, FaCheck } from "react-icons/fa";
 import "../../styles/dashboard.css";
 
 export default function Dashboard() {
@@ -9,6 +10,7 @@ export default function Dashboard() {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalStock, setTotalStock] = useState(0);
+  const [copied, setCopied] = useState(false);
   const sliderRef = useRef(null);
   const isHovered = useRef(false);
 
@@ -57,16 +59,16 @@ export default function Dashboard() {
   const displayProducts = [...recentProducts, ...recentProducts]; // for infinite scroll loop
 
   // 🎞️ Infinite auto-scroll (desktop only)
-    // 🎞️ Infinite auto-scroll (desktop only)
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider || displayProducts.length === 0) return;
 
-    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isTouchDevice =
+      "ontouchstart" in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) return; // ❌ Disable auto-scroll on mobile/touch devices
 
     let scrollAmount = 0;
-    const speed = 1.2; // scroll speed (px per tick)
+    const speed = 1.2;
 
     const scroll = () => {
       if (!slider) return;
@@ -75,10 +77,10 @@ export default function Dashboard() {
       slider.scrollLeft += speed;
       scrollAmount += speed;
 
-      // ✅ When we’ve scrolled past the halfway point (first clone set), reset smoothly
-      if (scrollAmount >= slider.scrollWidth / 2) {
-        slider.scrollLeft = 0;
-        scrollAmount = 0;
+      // ✅ Stop gently at the end instead of looping infinitely
+      if (scrollAmount >= slider.scrollWidth / 2 - slider.offsetWidth) {
+        slider.scrollLeft = slider.scrollWidth / 2 - slider.offsetWidth;
+        return;
       }
 
       requestAnimationFrame(scroll);
@@ -87,6 +89,15 @@ export default function Dashboard() {
     const anim = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(anim);
   }, [displayProducts]);
+
+  // 🧩 Copy storefront link
+  const storefrontUrl = `${window.location.origin}/store/${slug}`;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(storefrontUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="dashboard">
@@ -110,6 +121,18 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* 🔹 Storefront Link Section */}
+      <div className="storefront-link-card">
+        <h3>Your Storefront Link</h3>
+        <div className="link-box">
+          <input type="text" value={storefrontUrl} readOnly />
+          <button onClick={copyLink}>
+            {copied ? <FaCheck color="green" /> : <FaCopy />}{" "}
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      </div>
+
       {/* 🔹 Recent Products Section */}
       <div className="recent-products-section">
         <h3 className="section-title">Recent Products</h3>
@@ -119,7 +142,6 @@ export default function Dashboard() {
           onMouseEnter={() => (isHovered.current = true)}
           onMouseLeave={() => (isHovered.current = false)}
         >
-
           <div className="image-slider">
             {displayProducts.length > 0 ? (
               displayProducts.map((product, i) => (

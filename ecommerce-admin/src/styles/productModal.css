@@ -28,7 +28,8 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #eee;
-  padding: 1rem 1.2rem;
+  padding: 1rem;
+  border: none;
 }
 
 .modal-header h3 {
@@ -234,4 +235,58 @@
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 4px;
+}
+
+.modal-media-wrapper {
+  position: relative;
+  width: 200px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.modal-media {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.modal-media.fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-media img,
+.modal-media video {
+  max-width: 100%;
+  border-radius: 12px;
+  object-fit: contain;
+  transition: all 0.4s ease;
+}
+
+.added-toast {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  background: #28a745;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  animation: fadeInOut 2s ease;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10%, 80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
 }
