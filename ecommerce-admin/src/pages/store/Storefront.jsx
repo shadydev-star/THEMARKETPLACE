@@ -65,26 +65,35 @@ export default function Storefront() {
   return (
     <div className="storefront">
       {/* Navbar */}
-      <div className="store-navbar">
-        <Link to="/" className="store-logo">
-          {store.name}
-        </Link>
-        <input
-          className="store-search"
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+     <div className="store-navbar">
+  <Link to={`/store/${slug}`} className="store-logo">
+    {store.name}
+  </Link>
 
-        {/* 🛒 Cart Icon with Toast */}
-        <div className={`cart-icon-wrapper ${showToast ? "bounce" : ""}`}>
-          <Link to={`/store/${slug}/cart`} className="store-cart">
-            🛒 Cart ({cartCount})
-          </Link>
-          {showToast && <div className="cart-toast">✅ Added to Cart</div>}
-        </div>
-      </div>
+  <input
+    className="store-search"
+    type="text"
+    placeholder="Search products..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+  />
+
+  <div className="nav-icons">
+    {/* 🧾 Orders Icon */}
+    <Link to={`/store/${slug}/orders`} className="store-orders">
+      🧾 Orders
+    </Link>
+
+    {/* 🛒 Cart Icon */}
+    <div className={`cart-icon-wrapper ${showToast ? "bounce" : ""}`}>
+      <Link to={`/store/${slug}/cart`} className="store-cart">
+        🛒 Cart ({cartCount})
+      </Link>
+      {showToast && <div className="cart-toast">✅ Added to Cart</div>}
+    </div>
+  </div>
+</div>
+
 
       {/* Hero */}
       <div className="store-hero">

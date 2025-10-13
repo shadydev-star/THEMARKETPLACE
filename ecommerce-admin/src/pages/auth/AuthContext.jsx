@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
-
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
@@ -19,7 +19,6 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // fetch user data from Firestore
         const ref = doc(db, "wholesalers", user.uid);
         const snap = await getDoc(ref);
         if (snap.exists()) {
@@ -62,11 +61,24 @@ export function AuthProvider({ children }) {
     setCurrentUser(null);
   }
 
+  // ✅ Forgot Password (Reset link via email)
+  async function resetPassword(email) {
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: window.location.origin + "/login", // redirect after reset
+      });
+      return "Password reset link sent to your email.";
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
   const value = {
     currentUser,
     signup,
     login,
     logout,
+    resetPassword, // added
   };
 
   return (

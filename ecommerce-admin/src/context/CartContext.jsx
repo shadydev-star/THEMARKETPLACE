@@ -1,5 +1,5 @@
 // src/context/CartContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useCustomerAuth } from "../pages/auth/CustomerAuthContext";
@@ -7,42 +7,66 @@ import { useCustomerAuth } from "../pages/auth/CustomerAuthContext";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const { currentCustomer } = useCustomerAuth() || {}; // ✅ safe destructuring
+  const { currentCustomer } = useCustomerAuth() || {};
   const [carts, setCarts] = useState({});
-  const [showToast, setShowToast] = useState(false); // ✅ animation state
+  const [showToast, setShowToast] = useState(false);
+  const hasLoadedLocal = useRef(false);
 
-  // Load from localStorage
+  /** 🧩 Load carts from localStorage on first render */
   useEffect(() => {
     const saved = localStorage.getItem("multiStoreCarts");
-    if (saved) setCarts(JSON.parse(saved));
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCarts(parsed);
+        console.log("🧩 Loaded carts from localStorage:", parsed);
+      } catch (err) {
+        console.error("❌ Error parsing localStorage carts:", err);
+      }
+    }
+    hasLoadedLocal.current = true;
   }, []);
 
-  // Save to localStorage
+  /** 💾 Persist carts to localStorage (only after load) */
   useEffect(() => {
-    localStorage.setItem("multiStoreCarts", JSON.stringify(carts));
+    if (!hasLoadedLocal.current) return;
+    if (Object.keys(carts).length > 0) {
+      localStorage.setItem("multiStoreCarts", JSON.stringify(carts));
+    }
   }, [carts]);
 
-  // Load cart from Firestore when customer logs in
+  /** ☁️ Load Firestore cart when user logs in */
   useEffect(() => {
     if (!currentCustomer) return;
     const loadCart = async () => {
-      const ref = doc(db, "customers", currentCustomer.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists() && snap.data().carts) {
-        setCarts((prev) => ({ ...prev, ...snap.data().carts }));
+      try {
+        const ref = doc(db, "customers", currentCustomer.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists() && snap.data().carts) {
+          const firestoreCarts = snap.data().carts;
+          // ✅ merge Firestore carts into local ones without overwriting
+          setCarts((prev) => ({ ...firestoreCarts, ...prev }));
+          console.log("🔥 Merged Firestore carts:", firestoreCarts);
+        }
+      } catch (err) {
+        console.error("❌ Error loading Firestore cart:", err);
       }
     };
     loadCart();
   }, [currentCustomer]);
 
-  // Save to Firestore
+  /** ☁️ Save to Firestore whenever carts change (if logged in) */
   const saveToFirestore = async (updatedCarts) => {
     if (!currentCustomer) return;
-    const ref = doc(db, "customers", currentCustomer.uid);
-    await setDoc(ref, { carts: updatedCarts }, { merge: true });
+    try {
+      const ref = doc(db, "customers", currentCustomer.uid);
+      await setDoc(ref, { carts: updatedCarts }, { merge: true });
+    } catch (err) {
+      console.error("❌ Error saving to Firestore:", err);
+    }
   };
 
-  // ✅ Add to cart with toast
+  /** 🛒 Add product to cart */
   const addToCart = (slug, product) => {
     setCarts((prev) => {
       const storeCart = prev[slug] || [];
@@ -60,11 +84,11 @@ export function CartProvider({ children }) {
       return newCarts;
     });
 
-    // 🔔 Trigger toast animation
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1200);
   };
 
+  /** 🗑️ Remove product */
   const removeFromCart = (slug, id) => {
     setCarts((prev) => {
       const newCarts = {
@@ -76,6 +100,7 @@ export function CartProvider({ children }) {
     });
   };
 
+  /** 🔄 Update quantity */
   const updateQuantity = (slug, id, qty) => {
     if (qty < 1) return;
     setCarts((prev) => {
@@ -90,6 +115,7 @@ export function CartProvider({ children }) {
     });
   };
 
+  /** 🧹 Clear a store’s cart */
   const clearCart = (slug) => {
     setCarts((prev) => {
       const newCarts = { ...prev };
@@ -107,7 +133,7 @@ export function CartProvider({ children }) {
         removeFromCart,
         updateQuantity,
         clearCart,
-        showToast, // ✅ include toast flag for Storefront
+        showToast,
       }}
     >
       {children}

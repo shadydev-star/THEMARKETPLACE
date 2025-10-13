@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-// Admin (wholesaler) pages
+// 🧩 Admin (Wholesaler) pages
 import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
@@ -10,46 +10,46 @@ import Users from "./pages/admin/Users";
 import AddProduct from "./pages/admin/AddProduct";
 import EditProduct from "./pages/admin/EditProduct";
 
-// Storefront (customer) pages
+// 🛍️ Storefront (Customer-facing) pages
 import Storefront from "./pages/store/Storefront";
 import Cart from "./pages/store/Cart";
 import Checkout from "./pages/store/Checkout";
 import ThankYou from "./pages/store/ThankYou";
+import CustomerOrders from "./pages/store/CustomerOrders";
+import OrderDetails from "./pages/store/OrderDetails"; // ✅ new import
 
-// Wholesaler auth pages
+// 🔐 Wholesaler Auth pages
 import SignUp from "./pages/auth/SignUp";
 import Login from "./pages/auth/Login";
 
-// Customer auth & pages for storefront
-import { CustomerAuthProvider } from "./pages/auth/CustomerAuthContext";
-import StorefrontProtectedRoute from "./components/StorefrontProtectedRoute";
+// 👥 Customer Auth pages
 import CustomerSignUp from "./pages/store/CustomerSignUp";
 import CustomerLogin from "./pages/store/CustomerLogin";
 
-// Contexts
-import { AuthProvider } from "./pages/auth/AuthContext"; // wholesaler/admin auth
+// ⚙️ Context Providers
+import { AuthProvider } from "./pages/auth/AuthContext";
+import { CustomerAuthProvider } from "./pages/auth/CustomerAuthContext";
 import { CartProvider } from "./context/CartContext";
 
-// Components
+// 🔒 Route Guards
 import PrivateRoute from "./components/PrivateRoute";
+import StorefrontProtectedRoute from "./components/StorefrontProtectedRoute";
 
 function App() {
   return (
     <Router>
-      {/* Wholesaler/Admin Authentication Context */}
       <AuthProvider>
-        {/* Customer Auth + Cart Contexts wrap storefront */}
         <CustomerAuthProvider>
           <CartProvider>
             <Routes>
-              {/* Redirect root to login */}
+              {/* 🏠 Default redirect */}
               <Route path="/" element={<Navigate to="/login" />} />
 
-              {/* Wholesaler Auth routes */}
+              {/* 🔑 Wholesaler Auth */}
               <Route path="/signup" element={<SignUp />} />
               <Route path="/login" element={<Login />} />
 
-              {/* Protected Wholesaler Admin Routes */}
+              {/* 🧭 Protected Admin Routes */}
               <Route
                 path="/admin/:slug"
                 element={
@@ -66,7 +66,7 @@ function App() {
                 <Route path="edit-product/:id" element={<EditProduct />} />
               </Route>
 
-              {/* Storefront (customer-facing) routes */}
+              {/* 🛒 Storefront Routes (Customer side) */}
               <Route
                 path="/store/:slug"
                 element={
@@ -91,15 +91,37 @@ function App() {
                   </StorefrontProtectedRoute>
                 }
               />
+              <Route
+                path="/store/:slug/orders"
+                element={
+                  <StorefrontProtectedRoute>
+                    <CustomerOrders />
+                  </StorefrontProtectedRoute>
+                }
+              />
+              {/* ✅ New route for viewing single order details */}
+              <Route
+                path="/store/:slug/orders/:orderId"
+                element={
+                  <StorefrontProtectedRoute>
+                    <OrderDetails />
+                  </StorefrontProtectedRoute>
+                }
+              />
+              <Route
+                path="/store/:slug/thank-you"
+                element={
+                  <StorefrontProtectedRoute>
+                    <ThankYou />
+                  </StorefrontProtectedRoute>
+                }
+              />
 
-              {/* Customer signup / login pages for storefront */}
+              {/* 👤 Customer Authentication (per store) */}
               <Route path="/store/:slug/signup" element={<CustomerSignUp />} />
               <Route path="/store/:slug/login" element={<CustomerLogin />} />
 
-              {/* Thank you page */}
-              <Route path="/store/thank-you" element={<ThankYou />} />
-
-              {/* Catch-all redirect */}
+              {/* 🚫 Catch-all redirect */}
               <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
           </CartProvider>

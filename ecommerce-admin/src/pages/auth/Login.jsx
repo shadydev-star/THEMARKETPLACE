@@ -1,12 +1,12 @@
-// src/pages/auth/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Card, Container, Alert } from "react-bootstrap";
 import { useAuth } from "./AuthContext";
+import "../../styles/auth.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -31,48 +31,54 @@ export default function Login() {
   };
 
   return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
-      <Card style={{ maxWidth: "400px", width: "100%" }} className="p-4 shadow">
-        <h2 className="text-center mb-3">Wholesaler Login</h2>
-        <p className="text-center text-muted mb-4">Access your admin dashboard</p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2>Wholesaler Login</h2>
+        <p className="subtext">Access your admin dashboard</p>
 
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && <div className="alert error">{error}</div>}
 
-        <Form onSubmit={handleLogin}>
-          <Form.Group className="mb-3" controlId="formEmail">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>Email</label>
+            <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3" controlId="formPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </Form.Group>
+          <div className="form-group password-group">
+            <label>Password</label>
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <span
+                className="toggle-password"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </span>
+            </div>
+          </div>
 
-          <Button type="submit" className="w-100" disabled={loading}>
+          <button type="submit" className="btn primary" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
-          </Button>
-        </Form>
+          </button>
+        </form>
 
-        <div className="text-center mt-3">
+        <div className="signup-text">
           Don’t have an account?{" "}
-          <span className="text-primary" style={{ cursor: "pointer" }} onClick={() => navigate("/signup")}>
-            Sign up
-          </span>
+          <span onClick={() => navigate("/signup")}>Sign up</span>
         </div>
-      </Card>
-    </Container>
+      </div>
+    </div>
   );
 }

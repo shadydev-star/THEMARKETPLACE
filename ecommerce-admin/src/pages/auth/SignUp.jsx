@@ -1,13 +1,13 @@
-// src/pages/auth/SignUp.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Card, Container, Alert } from "react-bootstrap";
 import { useAuth } from "./AuthContext";
+import "../../styles/auth.css";
 
 export default function SignUp() {
   const [storeName, setStoreName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +20,8 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      if (!storeName || !email || !password) throw new Error("All fields are required");
+      if (!storeName || !email || !password)
+        throw new Error("All fields are required");
 
       const slug = await signup(storeName, email, password);
       navigate(`/admin/${slug}`);
@@ -32,59 +33,65 @@ export default function SignUp() {
   };
 
   return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
-      <Card style={{ maxWidth: "400px", width: "100%" }} className="p-4 shadow">
-        <h2 className="text-center mb-3">Create Your Wholesaler Account</h2>
-        <p className="text-center text-muted mb-4">Start selling from your own storefront</p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2>Create Your Wholesaler Account</h2>
+        <p className="subtext">Start selling from your own storefront</p>
 
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && <div className="alert error">{error}</div>}
 
-        <Form onSubmit={handleSignup}>
-          <Form.Group className="mb-3" controlId="formStoreName">
-            <Form.Label>Store Name</Form.Label>
-            <Form.Control
+        <form onSubmit={handleSignup}>
+          <div className="form-group">
+            <label>Store Name</label>
+            <input
               type="text"
               placeholder="e.g. Emma’s Fashion"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               required
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3" controlId="formEmail">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
+          <div className="form-group">
+            <label>Email</label>
+            <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3" controlId="formPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </Form.Group>
+          <div className="form-group password-group">
+            <label>Password</label>
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <span
+                className="toggle-password"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </span>
+            </div>
+          </div>
 
-          <Button type="submit" className="w-100" disabled={loading}>
+          <button type="submit" className="btn primary" disabled={loading}>
             {loading ? "Creating Account..." : "Sign Up"}
-          </Button>
-        </Form>
+          </button>
+        </form>
 
-        <div className="text-center mt-3">
+        <div className="signup-text">
           Already have an account?{" "}
-          <span className="text-primary" style={{ cursor: "pointer" }} onClick={() => navigate("/login")}>
-            Login
-          </span>
+          <span onClick={() => navigate("/login")}>Login</span>
         </div>
-      </Card>
-    </Container>
+      </div>
+    </div>
   );
 }

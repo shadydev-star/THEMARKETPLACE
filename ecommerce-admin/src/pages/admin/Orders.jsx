@@ -1,78 +1,73 @@
-// src/pages/admin/Orders.jsx 
-import { useState } from "react";
+// src/pages/admin/Orders.jsx
+import { useState, useEffect } from "react";
 import "../../styles/orders.css";
-import formatCurrency from "../../utils/formatCurrency"; // ✅ correct import
+import formatCurrency from "../../utils/formatCurrency";
+import { db } from "../../firebase";
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Orders() {
+  const { currentUser } = useAuth(); // Wholesaler
+  const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // ✅ Dummy data (replace with Firestore later)
-  const dummyOrders = [
-    {
-      id: "ORD123",
-      customer: {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "+234 801 234 5678",
-        address: "123 Main St, Lagos",
-      },
-      date: "2025-10-01",
-      status: "Pending",
-      payment: "Card",
-      total: 25000,
-      items: [
-        {
-          name: "Hoodie",
-          variant: "Blue L",
-          qty: 2,
-          price: 5000,
-          img: "https://via.placeholder.com/50",
-        },
-        {
-          name: "Shoes",
-          variant: "Black 42",
-          qty: 1,
-          price: 15000,
-          img: "https://via.placeholder.com/50",
-        },
-      ],
-    },
-    {
-      id: "ORD124",
-      customer: {
-        name: "Jane Smith",
-        email: "jane@example.com",
-        phone: "+234 802 345 6789",
-        address: "45 Broad St, Abuja",
-      },
-      date: "2025-10-02",
-      status: "Shipped",
-      payment: "Transfer",
-      total: 10000,
-      items: [
-        {
-          name: "Cap",
-          variant: "Red",
-          qty: 2,
-          price: 5000,
-          img: "https://via.placeholder.com/50",
-        },
-      ],
-    },
-  ];
+  // 🔄 Real-time listener
+  useEffect(() => {
+    if (!currentUser) return;
 
-  // ✅ Search & filter
-  const filteredOrders = dummyOrders.filter((order) => {
+    const q = query(
+      collection(db, "wholesalers", currentUser.uid, "orders"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchedOrders = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setOrders(fetchedOrders);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching orders:", error);
+        setLoading(false);
+      }
+    );
+
+    // 🧹 Clean up listener when component unmounts
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // 🔍 Filter + search
+  const filteredOrders = orders.filter((order) => {
     const matchSearch =
       order.id.toLowerCase().includes(search.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(search.toLowerCase());
+      order.customerInfo?.name
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
 
-    const matchStatus = statusFilter ? order.status === statusFilter : true;
+    const matchStatus = statusFilter
+      ? order.status === statusFilter
+      : true;
 
     return matchSearch && matchStatus;
   });
+
+  if (loading) {
+    return <p className="loading">Loading orders...</p>;
+  }
 
   return (
     <div className="orders-page">
@@ -91,13 +86,13 @@ export default function Orders() {
           onChange={(e) => setStatusFilter(e.target.value)}
         >
           <option value="">All Status</option>
-          <option value="Pending">Pending</option>
-          <option value="Shipped">Shipped</option>
-          <option value="Delivered">Delivered</option>
+          <option value="pending">Pending</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
         </select>
       </div>
 
-      {/* ✅ Orders Table */}
+      {/* 🧾 Orders Table */}
       <table className="orders-table">
         <thead>
           <tr>
@@ -114,10 +109,14 @@ export default function Orders() {
             filteredOrders.map((order) => (
               <tr key={order.id}>
                 <td>{order.id}</td>
-                <td>{order.customer.name}</td>
-                <td>{order.date}</td>
+                <td>{order.customerInfo?.name || "Unknown"}</td>
                 <td>
-                  <span className={`status ${order.status.toLowerCase()}`}>
+                  {order.createdAt?.toDate
+                    ? order.createdAt.toDate().toLocaleString()
+                    : "—"}
+                </td>
+                <td>
+                  <span className={`status ${order.status}`}>
                     {order.status}
                   </span>
                 </td>
@@ -141,13 +140,39 @@ export default function Orders() {
         <OrderModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
+          currentUser={currentUser}
         />
       )}
     </div>
   );
 }
 
-function OrderModal({ order, onClose }) {
+function OrderModal({ order, onClose, currentUser }) {
+  const [status, setStatus] = useState(order.status);
+  const [updating, setUpdating] = useState(false);
+
+  const handleStatusUpdate = async () => {
+    if (!currentUser) return;
+    setUpdating(true);
+    try {
+      const orderRef = doc(
+        db,
+        "wholesalers",
+        currentUser.uid,
+        "orders",
+        order.id
+      );
+      await updateDoc(orderRef, { status });
+      alert("✅ Order status updated!");
+      onClose();
+    } catch (error) {
+      console.error("Error updating order:", error);
+      alert("❌ Failed to update status.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal">
@@ -159,60 +184,32 @@ function OrderModal({ order, onClose }) {
         </div>
 
         <div className="modal-body">
-          <p>
-            <strong>Order ID:</strong> {order.id}
-          </p>
-          <p>
-            <strong>Customer:</strong> {order.customer.name}
-          </p>
-          <p>
-            <strong>Email:</strong> {order.customer.email}
-          </p>
-          <p>
-            <strong>Phone:</strong> {order.customer.phone}
-          </p>
-          <p>
-            <strong>Address:</strong> {order.customer.address}
-          </p>
-
+          <p><strong>Order ID:</strong> {order.id}</p>
+          <p><strong>Customer:</strong> {order.customerInfo?.name}</p>
+          <p><strong>Phone:</strong> {order.customerInfo?.phone}</p>
+          <p><strong>Address:</strong> {order.customerInfo?.address}</p>
           <hr />
-
-          <p>
-            <strong>Status:</strong> {order.status}
-          </p>
-          <p>
-            <strong>Date:</strong> {order.date}
-          </p>
-          <p>
-            <strong>Payment:</strong> {order.payment}
-          </p>
-          <p>
-            <strong>Total:</strong> {formatCurrency(order.total)}
-          </p>
+          <p><strong>Payment:</strong> {order.customerInfo?.payment}</p>
+          <p><strong>Status:</strong> {order.status}</p>
+          <p><strong>Total:</strong> {formatCurrency(order.total)}</p>
 
           <h4>Items</h4>
           <table className="items-table">
             <thead>
               <tr>
-                <th>Thumbnail</th>
                 <th>Product</th>
-                <th>Variant</th>
                 <th>Qty</th>
                 <th>Price</th>
                 <th>Subtotal</th>
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item, i) => (
+              {order.items?.map((item, i) => (
                 <tr key={i}>
-                  <td>
-                    <img src={item.img} alt={item.name} />
-                  </td>
                   <td>{item.name}</td>
-                  <td>{item.variant}</td>
-                  <td>{item.qty}</td>
+                  <td>{item.quantity}</td>
                   <td>{formatCurrency(item.price)}</td>
-                  <td>{formatCurrency(item.price * item.qty)}</td>
+                  <td>{formatCurrency(item.price * (item.quantity || 1))}</td>
                 </tr>
               ))}
             </tbody>
@@ -220,7 +217,24 @@ function OrderModal({ order, onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button className="status-btn">Update Status</button>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            disabled={updating}
+          >
+            <option value="pending">Pending</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+          </select>
+
+          <button
+            className="status-btn"
+            onClick={handleStatusUpdate}
+            disabled={updating}
+          >
+            {updating ? "Updating..." : "Update Status"}
+          </button>
+
           <button className="close-btn" onClick={onClose}>
             Close
           </button>

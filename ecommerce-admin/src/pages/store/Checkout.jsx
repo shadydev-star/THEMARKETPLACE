@@ -1,40 +1,94 @@
-import { useState } from "react";
+// src/pages/store/Checkout.jsx
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../../styles/store.css";
 import formatCurrency from "../../utils/formatCurrency";
-import { useCart } from "../../context/CartContext"; // ✅ import the shared context
+import { useCart } from "../../context/CartContext";
+import { db } from "../../firebase";
+import { addDoc, collection, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { useCustomerAuth } from "../auth/CustomerAuthContext";
 
 export default function Checkout() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { carts, clearCart } = useCart(); // ✅ access context functions
+  const { carts, clearCart } = useCart();
+  const { customer } = useCustomerAuth(); // ✅ Corrected
   const cart = carts[slug] || [];
 
+  const [wholesalerId, setWholesalerId] = useState(null);
   const [form, setForm] = useState({
     name: "",
     phone: "",
     address: "",
     payment: "cash",
   });
+  const [loading, setLoading] = useState(false);
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
     0
   );
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // 🔍 Fetch wholesalerId by slug
+  useEffect(() => {
+    const fetchWholesaler = async () => {
+      try {
+        const q = query(collection(db, "wholesalers"), where("slug", "==", slug));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          setWholesalerId(snapshot.docs[0].id);
+        } else {
+          console.warn("No wholesaler found for slug:", slug);
+        }
+      } catch (error) {
+        console.error("Error fetching wholesaler:", error);
+      }
+    };
+    fetchWholesaler();
+  }, [slug]);
 
-    // TODO: Save order to Firestore later
-    console.log("Order placed:", {
-      wholesaler: slug,
-      customer: form,
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!wholesalerId) {
+      alert("Store not found. Please try again later.");
+      return;
+    }
+
+    setLoading(true);
+
+    console.log("🧍 Current customer before placing order:", customer);
+
+    const orderData = {
+      customerId: customer?.uid || "guest",
+      customerInfo: form,
       items: cart,
       total: subtotal,
-    });
+      status: "pending",
+      payment: form.payment,
+      createdAt: Timestamp.now(),
+    };
 
-    clearCart(slug); // ✅ empty this wholesaler’s cart only
-    navigate(`/store/${slug}/thank-you`);
+    try {
+      // 🧾 Save to wholesaler's "orders" subcollection
+      await addDoc(collection(db, "wholesalers", wholesalerId, "orders"), orderData);
+
+      // 🧍 Save copy to customer's "orders" subcollection
+      if (customer) {
+        await addDoc(collection(db, "customers", customer.uid, "orders"), {
+          storeSlug: slug,
+          ...orderData,
+        });
+      }
+
+      clearCart(slug);
+      navigate(`/store/${slug}/thank-you`, { state: { order: orderData } });
+
+    } catch (error) {
+      console.error("❌ Error placing order:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -49,6 +103,7 @@ export default function Checkout() {
   return (
     <div className="checkout-page">
       <h2>Checkout</h2>
+
       <form className="checkout-form" onSubmit={handleSubmit}>
         <label>
           Full Name
@@ -92,8 +147,9 @@ export default function Checkout() {
         </label>
 
         <h3>Total: {formatCurrency(subtotal)}</h3>
-        <button type="submit" className="btn place-order-btn">
-          Place Order
+
+        <button type="submit" className="btn place-order-btn" disabled={loading}>
+          {loading ? "Placing Order..." : "Place Order"}
         </button>
       </form>
     </div>
