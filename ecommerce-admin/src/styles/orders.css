@@ -1,26 +1,28 @@
-.orders-page {
+.admin-orders-page {
   padding: 20px;
 }
 
-.orders-table {
+/* 🧾 Table */
+.admin-orders-page .orders-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   background: #fff;
 }
 
-.orders-table th,
-.orders-table td {
+.admin-orders-page .orders-table th,
+.admin-orders-page .orders-table td {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: center;
 }
 
-.orders-table th {
+.admin-orders-page .orders-table th {
   background: #efd915;
 }
 
-.orders-table button {
+/* Buttons */
+.admin-orders-page .orders-table button {
   padding: 6px 12px;
   border: none;
   background: #333;
@@ -29,23 +31,32 @@
   cursor: pointer;
 }
 
-.status {
+/* 🔖 Status labels */
+.admin-orders-page .status {
   padding: 4px 8px;
   border-radius: 4px;
   color: #fff;
 }
 
-.status.pending {
+.admin-orders-page .status.pending {
   background: orange;
 }
-.status.shipped {
+.admin-orders-page .status.shipped {
   background: blue;
 }
-.status.delivered {
+.admin-orders-page .status.delivered {
   background: green;
 }
 
-.modal-overlay {
+/* 🔽 Status dropdown inline */
+.admin-orders-page .status-dropdown {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Modal */
+.admin-orders-page .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -55,56 +66,65 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 999;
 }
 
-.modal {
+.admin-orders-page .modal {
   background: #fff;
   width: 600px;
   max-height: 80vh;
   overflow-y: auto;
   border-radius: 10px;
   padding: 20px;
+  animation: fadeIn 0.3s ease;
 }
 
-.modal-header {
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-orders-page .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.close-btn {
+.admin-orders-page .close-btn {
   background: none;
   border: none;
   font-size: 22px;
   cursor: pointer;
 }
 
-.items-table {
+/* Items table */
+.admin-orders-page .items-table {
   width: 100%;
   margin-top: 10px;
   border-collapse: collapse;
 }
 
-.items-table th,
-.items-table td {
+.admin-orders-page .items-table th,
+.admin-orders-page .items-table td {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-.items-table img {
+.admin-orders-page .items-table img {
   width: 40px;
   height: 40px;
   object-fit: cover;
 }
 
-.modal-footer {
+/* Footer */
+.admin-orders-page .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 15px;
 }
 
-.status-btn {
+.admin-orders-page .status-btn {
   background: #efd915;
   border: none;
   padding: 8px 14px;
@@ -113,7 +133,8 @@
   font-weight: bold;
 }
 
-.orders-controls {
+/* Controls */
+.admin-orders-page .orders-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -121,17 +142,146 @@
   gap: 10px;
 }
 
-.orders-controls input,
-.orders-controls select {
+.admin-orders-page .orders-controls input,
+.admin-orders-page .orders-controls select {
   padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
 }
 
-.orders-controls input:focus,
-.orders-controls select:focus {
+.admin-orders-page .orders-controls input:focus,
+.admin-orders-page .orders-controls select:focus {
   outline: none;
   border-color: #efd915;
   box-shadow: 0 0 5px rgba(239, 217, 21, 0.6);
+}
+
+/* ⚡ Quick filters */
+.admin-orders-page .quick-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.admin-orders-page .quick-filters button {
+  background: #f6f6f6;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-orders-page .quick-filters button:hover {
+  background: #eee;
+}
+
+.admin-orders-page .quick-filters button.active {
+  background: #efd915;
+  font-weight: bold;
+  border-color: #c9b710;
+}
+
+.admin-orders-page .orders-cards {
+  display: none;
+}
+
+/* 📱 Responsive Card View */
+@media (max-width: 768px) {
+  .admin-orders-page .orders-table {
+    display: none;
+  }
+
+  .admin-orders-page .orders-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .admin-orders-page .order-card {
+    background: #111111;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .admin-orders-page .order-card h4 {
+    margin-bottom: 8px;
+  }
+
+  .admin-orders-page .order-card .status {
+    display: inline-block;
+    margin-top: 5px;
+  }
+
+  .admin-orders-page .order-card button {
+    margin-top: 10px;
+    background-color: #efd915;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+  }
+}
+
+.status-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.status-btn:hover {
+  background: #0056b3;
+}
+
+.status-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.status-btn:contains("Updated") {
+  background: #28a745;
+}
+/* 🔽 Status Dropdown Styling */
+.status-dropdown {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  background: #f5f5f5;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Hover effect */
+.status-dropdown:hover {
+  background: #ebebeb;
+}
+
+/* Color-coded dropdowns */
+.status-dropdown.pending {
+  background: #fff4cc;
+  color: #b8860b;
+}
+
+.status-dropdown.shipped {
+  background: #d4f1ff;
+  color: #0074cc;
+}
+
+.status-dropdown.delivered {
+  background: #d1ffd9;
+  color: #0b8b1d;
+}
+
+/* Toast override */
+.Toastify__toast {
+  border-radius: 8px;
+  font-size: 0.95rem;
 }

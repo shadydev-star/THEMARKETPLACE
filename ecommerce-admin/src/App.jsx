@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
-import Orders from "./pages/admin/Orders";
+import Orders from "./pages/admin/AdminOrders";
 import Users from "./pages/admin/Users";
 import AddProduct from "./pages/admin/AddProduct";
 import EditProduct from "./pages/admin/EditProduct";

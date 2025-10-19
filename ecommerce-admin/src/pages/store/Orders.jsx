@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import "../../styles/store.css";
+import "../../styles/storeorders.css";
 import { db } from "../../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useCustomerAuth } from "../auth/CustomerAuthContext";
@@ -78,7 +78,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="orders-page">
+    <div className="store-orders-page">
       <h2>Your Orders</h2>
       <table className="orders-table">
         <thead>

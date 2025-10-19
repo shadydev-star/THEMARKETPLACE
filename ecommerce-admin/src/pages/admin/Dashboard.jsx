@@ -1,6 +1,7 @@
+// src/pages/admin/Dashboard.jsx
 import { useEffect, useState, useRef } from "react";
 import { db } from "../../firebase";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, where, getDocs } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import { FaCopy, FaCheck } from "react-icons/fa";
 import "../../styles/dashboard.css";
@@ -10,11 +11,31 @@ export default function Dashboard() {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalStock, setTotalStock] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [wholesalerId, setWholesalerId] = useState(null);
   const sliderRef = useRef(null);
   const isHovered = useRef(false);
 
-  // 🔹 Fetch products in real-time
+  // 🔹 Fetch wholesalerId by slug (for orders)
+  useEffect(() => {
+    const fetchWholesalerId = async () => {
+      try {
+        const q = query(collection(db, "wholesalers"), where("slug", "==", slug));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          setWholesalerId(snapshot.docs[0].id);
+        } else {
+          console.warn("No wholesaler found for slug:", slug);
+        }
+      } catch (err) {
+        console.error("Error fetching wholesaler ID:", err);
+      }
+    };
+    fetchWholesalerId();
+  }, [slug]);
+
+  // 🔹 Fetch products in real-time (still by slug)
   useEffect(() => {
     const q = query(
       collection(db, "wholesalers", slug, "products"),
@@ -22,23 +43,15 @@ export default function Dashboard() {
     );
 
     const unsub = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
+      const fetched = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setProducts(fetched);
 
-      // ✅ Count only base products
       const productCount = fetched.length;
 
-      // ✅ Total stock (including variants)
       let totalStockCount = 0;
       fetched.forEach((product) => {
-        if (product.variants && product.variants.length > 0) {
-          product.variants.forEach((v) => {
-            totalStockCount += Number(v.stock) || 0;
-          });
+        if (product.variants?.length) {
+          product.variants.forEach((v) => (totalStockCount += Number(v.stock) || 0));
         } else {
           totalStockCount += Number(product.stock) || 0;
         }
@@ -51,21 +64,32 @@ export default function Dashboard() {
     return () => unsub();
   }, [slug]);
 
+  // 🔹 Fetch total orders in real-time (by wholesalerId)
+  useEffect(() => {
+    if (!wholesalerId) return;
+
+    const q = query(collection(db, "wholesalers", wholesalerId, "orders"), orderBy("createdAt", "desc"));
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      setTotalOrders(snapshot.size);
+    });
+
+    return () => unsub();
+  }, [wholesalerId]);
+
   // ✅ Always use base product image
-  const getProductImage = (product) =>
-    product.image || product.imageUrl || product.photo || "/placeholder.png";
+  const getProductImage = (product) => product.image || product.imageUrl || product.photo || "/placeholder.png";
 
   const recentProducts = products.slice(0, 5);
-  const displayProducts = [...recentProducts, ...recentProducts]; // for infinite scroll loop
+  const displayProducts = [...recentProducts, ...recentProducts]; // for slider loop
 
-  // 🎞️ Infinite auto-scroll (desktop only)
+  // 🎞️ Infinite auto-scroll
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider || displayProducts.length === 0) return;
 
-    const isTouchDevice =
-      "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return; // ❌ Disable auto-scroll on mobile/touch devices
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
 
     let scrollAmount = 0;
     const speed = 1.2;
@@ -77,7 +101,6 @@ export default function Dashboard() {
       slider.scrollLeft += speed;
       scrollAmount += speed;
 
-      // ✅ Stop gently at the end instead of looping infinitely
       if (scrollAmount >= slider.scrollWidth / 2 - slider.offsetWidth) {
         slider.scrollLeft = slider.scrollWidth / 2 - slider.offsetWidth;
         return;
@@ -92,7 +115,6 @@ export default function Dashboard() {
 
   // 🧩 Copy storefront link
   const storefrontUrl = `${window.location.origin}/store/${slug}`;
-
   const copyLink = () => {
     navigator.clipboard.writeText(storefrontUrl);
     setCopied(true);
@@ -119,6 +141,11 @@ export default function Dashboard() {
           <h3>Recent Additions</h3>
           <p>{recentProducts.length}</p>
         </div>
+
+        <div className="stat-card">
+          <h3>Total Orders</h3>
+          <p>{totalOrders}</p>
+        </div>
       </div>
 
       {/* 🔹 Storefront Link Section */}
@@ -127,13 +154,12 @@ export default function Dashboard() {
         <div className="link-box">
           <input type="text" value={storefrontUrl} readOnly />
           <button onClick={copyLink}>
-            {copied ? <FaCheck color="green" /> : <FaCopy />}{" "}
-            {copied ? "Copied" : "Copy"}
+            {copied ? <FaCheck color="green" /> : <FaCopy />} {copied ? "Copied" : "Copy"}
           </button>
         </div>
       </div>
 
-      {/* 🔹 Recent Products Section */}
+      {/* 🔹 Recent Products Slider */}
       <div className="recent-products-section">
         <h3 className="section-title">Recent Products</h3>
         <div
@@ -143,17 +169,11 @@ export default function Dashboard() {
           onMouseLeave={() => (isHovered.current = false)}
         >
           <div className="image-slider">
-            {displayProducts.length > 0 ? (
-              displayProducts.map((product, i) => (
-                <ProductSlide
-                  key={`${product.id}-${i}`}
-                  product={product}
-                  getProductImage={getProductImage}
-                />
-              ))
-            ) : (
-              <p>No products yet...</p>
-            )}
+            {displayProducts.length > 0
+              ? displayProducts.map((product, i) => (
+                  <ProductSlide key={`${product.id}-${i}`} product={product} getProductImage={getProductImage} />
+                ))
+              : <p>No products yet...</p>}
           </div>
         </div>
       </div>
@@ -161,19 +181,13 @@ export default function Dashboard() {
   );
 }
 
-// 🧩 Subcomponent
+// 🧩 Product Slide
 function ProductSlide({ product, getProductImage }) {
   const [imgSrc, setImgSrc] = useState(getProductImage(product));
 
   return (
     <div className="slide">
-      <img
-        src={imgSrc}
-        alt={product.name}
-        loading="lazy"
-        onError={() => setImgSrc("/placeholder.png")}
-        className="fade-in"
-      />
+      <img src={imgSrc} alt={product.name} loading="lazy" onError={() => setImgSrc("/placeholder.png")} className="fade-in" />
       <p>{product.name}</p>
     </div>
   );

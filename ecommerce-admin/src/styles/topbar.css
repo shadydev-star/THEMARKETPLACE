@@ -35,3 +35,34 @@
 .topbar button:hover {
   background: #16213e;
 }
+/* 🔔 Pulse animation for unread notifications */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    color: #dc3545;
+  }
+  50% {
+    transform: scale(1.2);
+    color: #ff6666;
+  }
+  100% {
+    transform: scale(1);
+    color: #dc3545;
+  }
+}
+
+.bell-pulse {
+  animation: pulse 1.2s infinite;
+}
+
+/* 🌟 Highlight new notifications in dropdown */
+.new-notification {
+  background-color: #f8f9fa;
+  border-left: 3px solid #dc3545;
+}
+.dropdown-menu .fw-bold {
+  background-color: #f8f9fa;
+}
+.dropdown-menu .text-muted {
+  color: #6c757d !important;
+}

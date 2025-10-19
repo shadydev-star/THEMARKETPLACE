@@ -116,14 +116,19 @@ export function CartProvider({ children }) {
   };
 
   /** 🧹 Clear a store’s cart */
-  const clearCart = (slug) => {
-    setCarts((prev) => {
-      const newCarts = { ...prev };
-      delete newCarts[slug];
-      saveToFirestore(newCarts);
-      return newCarts;
-    });
-  };
+const clearCart = (slug) => {
+  setCarts((prev) => {
+    const newCarts = { ...prev };
+    delete newCarts[slug];
+
+    // 🧠 keep Firestore + localStorage in sync
+    saveToFirestore(newCarts);
+    localStorage.setItem("multiStoreCarts", JSON.stringify(newCarts));
+
+    return newCarts;
+  });
+};
+
 
   return (
     <CartContext.Provider

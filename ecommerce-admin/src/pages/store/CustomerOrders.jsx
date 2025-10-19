@@ -1,98 +1,84 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom"; // ✅ Added Link import
+import { useParams, Link } from "react-router-dom";
 import "../../styles/storeorders.css";
 import { db } from "../../firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
 import { useCustomerAuth } from "../auth/CustomerAuthContext";
 import formatCurrency from "../../utils/formatCurrency";
 
 export default function CustomerOrders() {
-  const { slug } = useParams(); 
+  const { slug } = useParams();
   const { customer } = useCustomerAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!customer) {
-        console.warn("⚠️ No logged-in customer, skipping fetch.");
-        setOrders([]);
-        setLoading(false);
-        return;
-      }
+    if (!customer) return;
 
-      try {
-        console.log("📨 Fetching orders for customer:", customer.uid);
-        console.log("🏪 Store slug:", slug);
+    const ordersRef = collection(db, "customers", customer.uid, "orders");
+    const q = query(ordersRef, where("storeSlug", "==", slug), orderBy("createdAt", "desc"));
 
-        const ordersRef = collection(db, "customers", customer.uid, "orders");
-        const q = query(
-          ordersRef,
-          where("storeSlug", "==", slug),
-          orderBy("createdAt", "desc")
-        );
-
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) {
-          console.warn("❌ No orders found for this store.");
-          setOrders([]);
-          return;
-        }
-
+    // 👇 Real-time listener
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
-        console.log("📦 Loaded customer orders:", data);
         setOrders(data);
-      } catch (err) {
-        console.error("🔥 Error fetching customer orders:", err);
-        setError(err.message);
-      } finally {
+        setLoading(false);
+      },
+      (error) => {
+        console.error("🔥 Error listening for orders:", error);
         setLoading(false);
       }
-    };
+    );
 
-    fetchOrders();
+    return () => unsubscribe(); // Cleanup listener
   }, [slug, customer]);
 
-  if (loading) return <div className="orders-page">Loading your orders...</div>;
-  if (error)
+  if (loading)
     return (
-      <div className="orders-page error">
-        <h2>Something went wrong</h2>
-        <p>{error}</p>
+      <div className="store-orders-page">
+        <div className="orders-loading">Loading your orders...</div>
       </div>
     );
+
   if (orders.length === 0)
     return (
-      <div className="orders-page">
-        <h2>No Orders Yet</h2>
-        <p>You haven’t placed any orders from this store.</p>
+      <div className="store-orders-page">
+        <div className="orders-empty">
+          <h2>No Orders Yet</h2>
+          <p>You haven’t placed any orders from this store.</p>
+          <Link to={`/store/${slug}`} className="btn back-store-btn">
+            ← Back to Storefront
+          </Link>
+        </div>
       </div>
     );
 
   return (
-    <div className="orders-page">
-      <h2>Your Orders</h2>
+    <div className="store-orders-page">
+      <div className="orders-header">
+        <h2>Your Orders</h2>
+        <Link to={`/store/${slug}`} className="btn back-store-btn">
+          ← Back to Storefront
+        </Link>
+      </div>
+
       <div className="orders-list">
         {orders.map((order) => (
           <div key={order.id} className="order-card">
             <div className="order-header">
               <h4>Order #{order.id.slice(0, 6).toUpperCase()}</h4>
-              <span className={`order-status ${order.status}`}>
-                {order.status}
-              </span>
+              <span className={`order-status ${order.status}`}>{order.status}</span>
             </div>
-
             <p className="order-date">
               {order.createdAt?.seconds
                 ? new Date(order.createdAt.seconds * 1000).toLocaleString()
                 : "Unknown date"}
             </p>
-
             <ul className="order-items">
               {order.items?.map((item, index) => (
                 <li key={index}>
@@ -101,11 +87,9 @@ export default function CustomerOrders() {
                 </li>
               ))}
             </ul>
-
             <div className="order-total">
               <strong>Total: </strong> {formatCurrency(order.total)}
             </div>
-
             <Link
               to={`/store/${slug}/orders/${order.id}`}
               className="btn view-details-btn"
