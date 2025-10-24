@@ -326,7 +326,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
       <div className="image-previews">
         {variant.images?.map((url, i) => (
           <div key={`ex-${i}`} className="preview-wrapper">
-            {url.match(/\.(mp4|mov|webm)$/i) ? (
+            {url.match(/\.(mp4|mov|webm|avi|m4v|mkv|ogg)$/i) ? (
               <video src={url} controls className="preview-media" />
             ) : (
               <img src={url} alt="existing" className="preview-img" />

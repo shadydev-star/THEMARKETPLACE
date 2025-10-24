@@ -123,16 +123,7 @@
   padding: 0.75rem 1rem 1rem;
   gap: 0.5rem;
 }
-.product-actions .btn {
-  flex: 1;
-  padding: 0.6rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s ease;
-}
+
 .view-btn {
     background: #fff;
     border: none;
@@ -148,8 +139,15 @@
   background: #ddd;
 }
 .add-btn {
-  background: #d71920;
-  color: #fff;
+  background: #fff;
+    border: none;
+    color: #ffffff;
+    padding:0.6rem;
+    border-radius: 6px;
+    font-weight: bold;
+    flex: 1;
+    margin: 16px 0 0;
+    background-color: #efd915;
 }
 .add-btn:hover {
   background: #b7151c;

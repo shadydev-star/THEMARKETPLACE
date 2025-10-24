@@ -49,43 +49,22 @@ export default function Orders() {
 
   // 🧠 Update Status + Sync to Customer
   const handleStatusChange = async (orderId, newStatus) => {
-  try {
-    const orderRef = doc(db, "wholesalers", currentUser.uid, "orders", orderId);
-    await updateDoc(orderRef, { status: newStatus });
+    try {
+      const orderRef = doc(db, "wholesalers", currentUser.uid, "orders", orderId);
+      await updateDoc(orderRef, { status: newStatus });
 
-    const changedOrder = orders.find((o) => o.id === orderId);
+      const changedOrder = orders.find((o) => o.id === orderId);
+      if (changedOrder?.customerOrderPath) {
+        const customerRef = doc(db, changedOrder.customerOrderPath);
+        await updateDoc(customerRef, { status: newStatus });
+      }
 
-    // ✅ Ensure we have enough info to locate the customer order
-    if (
-      changedOrder?.customerInfo?.uid &&
-      changedOrder?.customerOrderId &&
-      changedOrder?.storeSlug
-    ) {
-      const customerOrderRef = doc(
-        db,
-        "customers",
-        changedOrder.customerInfo.uid,
-        "orders",
-        changedOrder.customerOrderId
-      );
-      await updateDoc(customerOrderRef, { status: newStatus });
-      console.log("✅ Synced status to customer order");
-    } else if (changedOrder?.customerOrderPath) {
-      // fallback for older orders that used a full path string
-      const customerRef = doc(db, changedOrder.customerOrderPath);
-      await updateDoc(customerRef, { status: newStatus });
-      console.log("✅ Synced status via stored path");
-    } else {
-      console.warn("⚠️ Missing customer order reference, cannot sync.");
+      console.log("✅ Order status updated:", newStatus);
+    } catch (err) {
+      console.error("❌ Error updating status:", err);
+      alert("Failed to update order status.");
     }
-
-    console.log("✅ Order status updated:", newStatus);
-  } catch (err) {
-    console.error("❌ Error updating status:", err);
-    alert("Failed to update order status.");
-  }
-};
-
+  };
 
   // 🔍 Filter + search
   const filteredOrders = orders.filter((order) => {

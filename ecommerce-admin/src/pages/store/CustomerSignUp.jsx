@@ -1,3 +1,4 @@
+// src/pages/store/CustomerSignUp.jsx
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useCustomerAuth } from "../auth/CustomerAuthContext";
@@ -12,8 +13,7 @@ export default function CustomerSignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +21,15 @@ export default function CustomerSignUp() {
     setLoading(true);
     try {
       await customerSignup(form.name, form.email, form.password, slug);
-      navigate(`/store/${slug}`);
+
+      // redirect back to the saved URL or store homepage
+      const redirectUrl = localStorage.getItem("redirectAfterSignup");
+      if (redirectUrl) {
+        localStorage.removeItem("redirectAfterSignup");
+        navigate(redirectUrl);
+      } else {
+        navigate(`/store/${slug}`);
+      }
     } catch (err) {
       setError(err.message);
     } finally {

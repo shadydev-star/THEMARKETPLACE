@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // 🧩 Admin (Wholesaler) pages
@@ -12,11 +13,12 @@ import EditProduct from "./pages/admin/EditProduct";
 
 // 🛍️ Storefront (Customer-facing) pages
 import Storefront from "./pages/store/Storefront";
+import ProductDetails from "./pages/store/ProductDetails";
 import Cart from "./pages/store/Cart";
 import Checkout from "./pages/store/Checkout";
 import ThankYou from "./pages/store/ThankYou";
 import CustomerOrders from "./pages/store/CustomerOrders";
-import OrderDetails from "./pages/store/OrderDetails"; // ✅ new import
+import OrderDetails from "./pages/store/OrderDetails";
 
 // 🔐 Wholesaler Auth pages
 import SignUp from "./pages/auth/SignUp";
@@ -35,6 +37,22 @@ import { CartProvider } from "./context/CartContext";
 import PrivateRoute from "./components/PrivateRoute";
 import StorefrontProtectedRoute from "./components/StorefrontProtectedRoute";
 
+// 🧭 Auto redirect customers to last visited store
+function AutoRedirectStorefront() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const lastStore = localStorage.getItem("lastStoreSlug");
+    if (lastStore) {
+      navigate(`/store/${lastStore}`, { replace: true });
+    } else {
+      navigate("/store/demo-store", { replace: true }); // fallback store
+    }
+  }, [navigate]);
+
+  return null;
+}
+
 function App() {
   return (
     <Router>
@@ -42,8 +60,11 @@ function App() {
         <CustomerAuthProvider>
           <CartProvider>
             <Routes>
-              {/* 🏠 Default redirect */}
-              <Route path="/" element={<Navigate to="/login" />} />
+              {/* 🏠 Default route = Wholesaler login */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+
+              {/* 🧭 Store auto-redirect route */}
+              <Route path="/store" element={<AutoRedirectStorefront />} />
 
               {/* 🔑 Wholesaler Auth */}
               <Route path="/signup" element={<SignUp />} />
@@ -66,12 +87,20 @@ function App() {
                 <Route path="edit-product/:id" element={<EditProduct />} />
               </Route>
 
-              {/* 🛒 Storefront Routes (Customer side) */}
+              {/* 🛒 Storefront (Customer) Routes */}
               <Route
                 path="/store/:slug"
                 element={
                   <StorefrontProtectedRoute>
                     <Storefront />
+                  </StorefrontProtectedRoute>
+                }
+              />
+              <Route
+                path="/store/:slug/product/:productId"
+                element={
+                  <StorefrontProtectedRoute>
+                    <ProductDetails />
                   </StorefrontProtectedRoute>
                 }
               />
@@ -99,7 +128,6 @@ function App() {
                   </StorefrontProtectedRoute>
                 }
               />
-              {/* ✅ New route for viewing single order details */}
               <Route
                 path="/store/:slug/orders/:orderId"
                 element={
@@ -117,12 +145,18 @@ function App() {
                 }
               />
 
-              {/* 👤 Customer Authentication (per store) */}
+              {/* 👤 Customer Authentication */}
               <Route path="/store/:slug/signup" element={<CustomerSignUp />} />
               <Route path="/store/:slug/login" element={<CustomerLogin />} />
 
-              {/* 🚫 Catch-all redirect */}
-              <Route path="*" element={<Navigate to="/login" />} />
+              {/* 🚫 Catch-all for storefront */}
+              <Route path="/store/*" element={<Navigate to="/store/demo-store" replace />} />
+
+              {/* 🚫 Catch-all for admin/wholesaler */}
+              <Route path="/admin/*" element={<Navigate to="/login" replace />} />
+
+              {/* 🚫 Everything else → wholesaler login */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </CartProvider>
         </CustomerAuthProvider>

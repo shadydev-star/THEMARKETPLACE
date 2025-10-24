@@ -1,20 +1,26 @@
-// src/pages/storefront/Storefront.jsx
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import "../../styles/store.css";
 import formatCurrency from "../../utils/formatCurrency";
-import ProductModal from "./ProductModal";
 import { useCart } from "../../context/CartContext";
 
 export default function Storefront() {
   const { slug } = useParams();
-  const { addToCart, carts, showToast } = useCart(); // ✅ includes showToast flag
+  const navigate = useNavigate();
+  const { addToCart, carts, showToast } = useCart();
   const [search, setSearch] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [store, setStore] = useState({ name: "", products: [] });
   const [loading, setLoading] = useState(true);
+
+
+      useEffect(() => {
+      if (slug) {
+        localStorage.setItem("lastStoreSlug", slug);
+      }
+    }, [slug]);
+
 
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -54,46 +60,42 @@ export default function Storefront() {
   );
 
   if (loading) {
-  return (
-    <div className="storefront loading-spinner">
-      <div className="spinner"></div>
-    </div>
-  );
-}
-
+    return (
+      <div className="storefront loading-spinner">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="storefront">
       {/* Navbar */}
-     <div className="store-navbar">
-  <Link to={`/store/${slug}`} className="store-logo">
-    {store.name}
-  </Link>
+      <div className="store-navbar">
+        <Link to={`/store/${slug}`} className="store-logo">
+          {store.name}
+        </Link>
 
-  <input
-    className="store-search"
-    type="text"
-    placeholder="Search products..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-  />
+        <input
+          className="store-search"
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-  <div className="nav-icons">
-    {/* 🧾 Orders Icon */}
-    <Link to={`/store/${slug}/orders`} className="store-orders">
-      🧾 Orders
-    </Link>
+        <div className="nav-icons">
+          <Link to={`/store/${slug}/orders`} className="store-orders">
+            🧾 Orders
+          </Link>
 
-    {/* 🛒 Cart Icon */}
-    <div className={`cart-icon-wrapper ${showToast ? "bounce" : ""}`}>
-      <Link to={`/store/${slug}/cart`} className="store-cart">
-        🛒 Cart ({cartCount})
-      </Link>
-      {showToast && <div className="cart-toast">✅ Added to Cart</div>}
-    </div>
-  </div>
-</div>
-
+          <div className={`cart-icon-wrapper ${showToast ? "bounce" : ""}`}>
+            <Link to={`/store/${slug}/cart`} className="store-cart">
+              🛒 Cart ({cartCount})
+            </Link>
+            {showToast && <div className="cart-toast">✅ Added to Cart</div>}
+          </div>
+        </div>
+      </div>
 
       {/* Hero */}
       <div className="store-hero">
@@ -111,6 +113,10 @@ export default function Storefront() {
                   src={p.image || p.img || "https://via.placeholder.com/200"}
                   alt={p.name}
                   className="product-img"
+                  onClick={() =>
+                    navigate(`/store/${slug}/product/${p.id}`)
+                  }
+                  style={{ cursor: "pointer" }}
                 />
               </div>
 
@@ -121,14 +127,16 @@ export default function Storefront() {
 
               <div className="product-actions">
                 <button
-                  className="view-btn"
-                  onClick={() => setSelectedProduct(p)}
-                >
+                    className="view-btn"
+                    onClick={() =>
+                      navigate(`/store/${slug}/product/${p.id}`, { state: { from: "wholesaler" } })
+                    }
+                  >
                   View
                 </button>
                 <button
                   className="btn add-btn"
-                  onClick={() => addToCart(slug, p)} // ✅ triggers toast + bounce
+                  onClick={() => addToCart(slug, p)}
                 >
                   Add to Cart
                 </button>
@@ -139,16 +147,6 @@ export default function Storefront() {
           <p className="no-products">No products available</p>
         )}
       </div>
-
-      {/* Product Modal */}
-      {selectedProduct && (
-        <ProductModal
-          slug={slug}
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          addToCart={addToCart}
-        />
-      )}
 
       {/* Footer */}
       <footer className="store-footer">
