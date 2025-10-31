@@ -80,38 +80,72 @@ export default function Dashboard() {
   // ✅ Always use base product image
   const getProductImage = (product) => product.image || product.imageUrl || product.photo || "/placeholder.png";
 
-  const recentProducts = products.slice(0, 5);
-  const displayProducts = [...recentProducts, ...recentProducts]; // for slider loop
+  // 🔹 Recent Products Slider
+const recentProducts = products.slice(0, 5);
+const displayProducts = recentProducts.length > 1
+  ? [...recentProducts, ...recentProducts] // duplicate only if more than 1
+  : recentProducts;
 
-  // 🎞️ Infinite auto-scroll
-  useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider || displayProducts.length === 0) return;
+useEffect(() => {
+  const slider = sliderRef.current;
+  if (!slider || displayProducts.length <= 1) return; // no loop if 0 or 1 product
 
-    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
+  let speed = 0.8; // scroll speed
+  let rafId;
 
-    let scrollAmount = 0;
-    const speed = 1.2;
+  const loopScroll = () => {
+    if (isHovered.current) {
+      rafId = requestAnimationFrame(loopScroll);
+      return;
+    }
 
-    const scroll = () => {
-      if (!slider) return;
-      if (isHovered.current) return;
+    slider.scrollLeft += speed;
 
-      slider.scrollLeft += speed;
-      scrollAmount += speed;
+    // seamless reset
+    if (slider.scrollLeft >= slider.scrollWidth / 2) {
+      slider.scrollLeft -= slider.scrollWidth / 2;
+    }
 
-      if (scrollAmount >= slider.scrollWidth / 2 - slider.offsetWidth) {
-        slider.scrollLeft = slider.scrollWidth / 2 - slider.offsetWidth;
-        return;
-      }
+    rafId = requestAnimationFrame(loopScroll);
+  };
 
-      requestAnimationFrame(scroll);
-    };
+  rafId = requestAnimationFrame(loopScroll);
+  return () => cancelAnimationFrame(rafId);
+}, [displayProducts]);
 
-    const anim = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(anim);
-  }, [displayProducts]);
+
+  // 🎞️ Infinite auto-scroll (seamless version)
+useEffect(() => {
+  const slider = sliderRef.current;
+  if (!slider || displayProducts.length === 0) return;
+
+  let speed = 0.8;
+  let rafId;
+
+  const loop = () => {
+    if (isHovered.current) {
+      rafId = requestAnimationFrame(loop);
+      return;
+    }
+
+    slider.scrollLeft += speed;
+
+    const halfWidth = slider.scrollWidth / 2;
+    // if fully scrolled through first half
+    if (slider.scrollLeft >= halfWidth) {
+      // subtract halfWidth instead of resetting to 0 (no jump)
+      slider.scrollLeft -= halfWidth;
+    }
+
+    rafId = requestAnimationFrame(loop);
+  };
+
+  rafId = requestAnimationFrame(loop);
+  return () => cancelAnimationFrame(rafId);
+}, [displayProducts]);
+
+
+
 
   // 🧩 Copy storefront link
   const storefrontUrl = `${window.location.origin}/store/${slug}`;

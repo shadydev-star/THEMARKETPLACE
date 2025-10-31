@@ -19,6 +19,7 @@ import Checkout from "./pages/store/Checkout";
 import ThankYou from "./pages/store/ThankYou";
 import CustomerOrders from "./pages/store/CustomerOrders";
 import OrderDetails from "./pages/store/OrderDetails";
+import OrderHistory from "./pages/store/Orderhistory"; // NEW
 
 // 🔐 Wholesaler Auth pages
 import SignUp from "./pages/auth/SignUp";
@@ -148,6 +149,16 @@ function App() {
               {/* 👤 Customer Authentication */}
               <Route path="/store/:slug/signup" element={<CustomerSignUp />} />
               <Route path="/store/:slug/login" element={<CustomerLogin />} />
+
+              {/* 📋 CUSTOMER ORDER HISTORY ROUTES (NEW) */}
+              <Route
+                path="/customer/order-history"
+                element={
+                  <StorefrontProtectedRoute>
+                    <OrderHistory />
+                  </StorefrontProtectedRoute>
+                }
+              />
 
               {/* 🚫 Catch-all for storefront */}
               <Route path="/store/*" element={<Navigate to="/store/demo-store" replace />} />
