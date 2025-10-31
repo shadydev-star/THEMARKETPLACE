@@ -19,7 +19,7 @@ import Checkout from "./pages/store/Checkout";
 import ThankYou from "./pages/store/ThankYou";
 import CustomerOrders from "./pages/store/CustomerOrders";
 import OrderDetails from "./pages/store/OrderDetails";
-import OrderHistory from "./pages/store/Orderhistory"; // NEW
+import OrderHistory from "./pages/store/OrderHistory"; // NEW
 
 // 🔐 Wholesaler Auth pages
 import SignUp from "./pages/auth/SignUp";
