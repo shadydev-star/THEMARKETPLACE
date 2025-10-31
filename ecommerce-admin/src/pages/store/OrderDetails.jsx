@@ -105,8 +105,7 @@ export default function OrderDetails() {
         {/* Header Section */}
         <div className="order-details-header">
           <div className="breadcrumb-nav">
-            <Link to="/" className="breadcrumb-link">Home</Link>
-            <span className="breadcrumb-separator">/</span>
+            
             <Link to={`/store/${slug}/orders`} className="breadcrumb-link">Orders</Link>
             <span className="breadcrumb-separator">/</span>
             <span className="breadcrumb-current">Order Details</span>
