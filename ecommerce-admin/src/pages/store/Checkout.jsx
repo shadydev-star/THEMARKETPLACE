@@ -14,7 +14,8 @@ import {
   Timestamp,
   setDoc,
   doc,
-} from "firebase/firestore";
+  getDoc,
+} from "firebase/firestore"; // Added getDoc import
 import { useCustomerAuth } from "../auth/CustomerAuthContext";
 
 export default function Checkout() {
@@ -51,6 +52,24 @@ export default function Checkout() {
     };
     fetchWholesaler();
   }, [slug]);
+
+  // ✅ Check if order notifications are enabled
+  const shouldCreateOrderNotification = async (userId) => {
+    try {
+      const settingsRef = doc(db, "wholesalers", userId, "settings", "preferences");
+      const settingsSnap = await getDoc(settingsRef);
+      
+      if (settingsSnap.exists()) {
+        const settings = settingsSnap.data().notifications;
+        return settings.orderAlerts; // Return the orderAlerts setting
+      }
+      
+      return true; // Default to true if no settings exist
+    } catch (error) {
+      console.error("Error checking notification settings:", error);
+      return true; // Default to true on error
+    }
+  };
 
   // ✅ Save order (shared between cash + Paystack)
   const saveOrder = async (paymentStatus = "pending", reference = null) => {
@@ -97,18 +116,28 @@ export default function Checkout() {
       wholesalerId,
     });
 
-    const notificationRef = collection(
-      db,
-      "wholesalers",
-      wholesalerId,
-      "notifications"
-    );
-    await addDoc(notificationRef, {
-      message: `🛒 New order from ${form.name || "a customer"} (${form.phone})`,
-      orderId,
-      read: false,
-      createdAt: Timestamp.now(),
-    });
+    // ✅ CHECK NOTIFICATION SETTINGS BEFORE CREATING NOTIFICATION
+    const shouldNotify = await shouldCreateOrderNotification(wholesalerId);
+    
+    if (shouldNotify) {
+      const notificationRef = collection(
+        db,
+        "wholesalers",
+        wholesalerId,
+        "notifications"
+      );
+      await addDoc(notificationRef, {
+        title: "🛒 New Order Received!", // Added title for better structure
+        message: `New order from ${form.name || "a customer"} (${form.phone}) - ${formatCurrency(total)}`,
+        type: 'order', // Added type for filtering
+        orderId,
+        read: false,
+        createdAt: Timestamp.now(),
+      });
+      console.log('Order notification created');
+    } else {
+      console.log('Order notifications are disabled, skipping notification');
+    }
 
     clearCart(slug);
     navigate(`/store/${slug}/thank-you`, { state: { order: orderData } });

@@ -3,10 +3,13 @@ import { useEffect, useState, useRef } from "react";
 import { db } from "../../firebase";
 import { collection, onSnapshot, query, orderBy, where, getDocs } from "firebase/firestore";
 import { useParams } from "react-router-dom";
-import { FaCopy, FaCheck } from "react-icons/fa";
+import { FaCopy, FaCheck, FaBox, FaCube, FaPlus, FaShoppingCart } from "react-icons/fa";
 import "../../styles/dashboard.css";
+import formatCurrency from "../../utils/formatCurrency";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Dashboard() {
+  const { isDarkMode } = useTheme();
   const { slug } = useParams();
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -81,73 +84,39 @@ export default function Dashboard() {
   const getProductImage = (product) => product.image || product.imageUrl || product.photo || "/placeholder.png";
 
   // 🔹 Recent Products Slider
-const recentProducts = products.slice(0, 5);
-const displayProducts = recentProducts.length > 1
-  ? [...recentProducts, ...recentProducts] // duplicate only if more than 1
-  : recentProducts;
+  const recentProducts = products.slice(0, 5);
+  const displayProducts = recentProducts.length > 1
+    ? [...recentProducts, ...recentProducts] // duplicate only if more than 1
+    : recentProducts;
 
-useEffect(() => {
-  const slider = sliderRef.current;
-  if (!slider || displayProducts.length <= 1) return; // no loop if 0 or 1 product
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider || displayProducts.length <= 1) return; // no loop if 0 or 1 product
 
-  let speed = 0.8; // scroll speed
-  let rafId;
+    let speed = 0.8; // scroll speed
+    let rafId;
 
-  const loopScroll = () => {
-    if (isHovered.current) {
+    const loopScroll = () => {
+      if (isHovered.current) {
+        rafId = requestAnimationFrame(loopScroll);
+        return;
+      }
+
+      slider.scrollLeft += speed;
+
+      // seamless reset
+      if (slider.scrollLeft >= slider.scrollWidth / 2) {
+        slider.scrollLeft -= slider.scrollWidth / 2;
+      }
+
       rafId = requestAnimationFrame(loopScroll);
-      return;
-    }
-
-    slider.scrollLeft += speed;
-
-    // seamless reset
-    if (slider.scrollLeft >= slider.scrollWidth / 2) {
-      slider.scrollLeft -= slider.scrollWidth / 2;
-    }
+    };
 
     rafId = requestAnimationFrame(loopScroll);
-  };
+    return () => cancelAnimationFrame(rafId);
+  }, [displayProducts]);
 
-  rafId = requestAnimationFrame(loopScroll);
-  return () => cancelAnimationFrame(rafId);
-}, [displayProducts]);
-
-
-  // 🎞️ Infinite auto-scroll (seamless version)
-useEffect(() => {
-  const slider = sliderRef.current;
-  if (!slider || displayProducts.length === 0) return;
-
-  let speed = 0.8;
-  let rafId;
-
-  const loop = () => {
-    if (isHovered.current) {
-      rafId = requestAnimationFrame(loop);
-      return;
-    }
-
-    slider.scrollLeft += speed;
-
-    const halfWidth = slider.scrollWidth / 2;
-    // if fully scrolled through first half
-    if (slider.scrollLeft >= halfWidth) {
-      // subtract halfWidth instead of resetting to 0 (no jump)
-      slider.scrollLeft -= halfWidth;
-    }
-
-    rafId = requestAnimationFrame(loop);
-  };
-
-  rafId = requestAnimationFrame(loop);
-  return () => cancelAnimationFrame(rafId);
-}, [displayProducts]);
-
-
-
-
-  // 🧩 Copy storefront link
+  //  Copy storefront link
   const storefrontUrl = `${window.location.origin}/store/${slug}`;
   const copyLink = () => {
     navigator.clipboard.writeText(storefrontUrl);
@@ -156,58 +125,113 @@ useEffect(() => {
   };
 
   return (
-    <div className="dashboard">
-      <h2>Admin Dashboard</h2>
+    <div className={`dashboard ${isDarkMode ? 'dark-mode' : ''}`}>
+      {/* 🔹 Header Section */}
+      <div className="dashboard-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back! Here's what's happening with your store today.</p>
+      </div>
 
-      {/* 🔹 Stats Section */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Products</h3>
-          <p>{totalProducts}</p>
+      {/* 🔹 Stats Section  */}
+      <div className="stats-grid-new">
+        <div className="stat-card-new">
+          <div className="stat-icon stat-icon-products">
+            <FaBox />
+          </div>
+          <div className="stat-content">
+            <h3>{totalProducts}</h3>
+            <p>Total Products</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>Total Stock</h3>
-          <p>{totalStock}</p>
+        <div className="stat-card-new">
+          <div className="stat-icon stat-icon-stock">
+            <FaCube />
+          </div>
+          <div className="stat-content">
+            <h3>{totalStock}</h3>
+            <p>Total Stock</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>Recent Additions</h3>
-          <p>{recentProducts.length}</p>
+        <div className="stat-card-new">
+          <div className="stat-icon stat-icon-recent">
+            <FaPlus />
+          </div>
+          <div className="stat-content">
+            <h3>{recentProducts.length}</h3>
+            <p>Recent Additions</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>Total Orders</h3>
-          <p>{totalOrders}</p>
+        <div className="stat-card-new">
+          <div className="stat-icon stat-icon-orders">
+            <FaShoppingCart />
+          </div>
+          <div className="stat-content">
+            <h3>{totalOrders}</h3>
+            <p>Total Orders</p>
+          </div>
         </div>
       </div>
 
       {/* 🔹 Storefront Link Section */}
-      <div className="storefront-link-card">
-        <h3>Your Storefront Link</h3>
-        <div className="link-box">
-          <input type="text" value={storefrontUrl} readOnly />
-          <button onClick={copyLink}>
-            {copied ? <FaCheck color="green" /> : <FaCopy />} {copied ? "Copied" : "Copy"}
-          </button>
+      <div className="storefront-section-new">
+        <div className="section-header">
+          <h2>Storefront Link</h2>
+          <p>Share this link with your customers to start selling</p>
+        </div>
+        <div className="link-card-new">
+          <div className="link-content">
+            <span className="link-label">Your Store URL</span>
+            <div className="link-box-new">
+              <input 
+                type="text" 
+                value={storefrontUrl} 
+                readOnly 
+                className={isDarkMode ? 'dark-input' : ''}
+              />
+              <button 
+                onClick={copyLink}
+                className={`copy-btn-new ${copied ? 'copied' : ''} ${isDarkMode ? 'dark-btn' : ''}`}
+              >
+                {copied ? <FaCheck /> : <FaCopy />}
+                {copied ? "Copied!" : "Copy Link"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 🔹 Recent Products Slider */}
-      <div className="recent-products-section">
-        <h3 className="section-title">Recent Products</h3>
+      {/* 🔹 Recent Products Section*/}
+      <div className="recent-products-section-new">
+        <div className="section-header">
+          <h2>Recent Products</h2>
+          <p>Your latest product additions</p>
+        </div>
         <div
-          className={`slider-container ${isHovered.current ? "paused" : ""}`}
+          className={`slider-container-new ${isHovered.current ? "paused" : ""} ${isDarkMode ? 'dark-slider' : ''}`}
           ref={sliderRef}
           onMouseEnter={() => (isHovered.current = true)}
           onMouseLeave={() => (isHovered.current = false)}
         >
-          <div className="image-slider">
+          <div className="image-slider-new">
             {displayProducts.length > 0
               ? displayProducts.map((product, i) => (
-                  <ProductSlide key={`${product.id}-${i}`} product={product} getProductImage={getProductImage} />
+                  <ProductSlideNew 
+                    key={`${product.id}-${i}`} 
+                    product={product} 
+                    getProductImage={getProductImage}
+                    isDarkMode={isDarkMode}
+                  />
                 ))
-              : <p>No products yet...</p>}
+              : (
+                <div className="empty-state">
+                  <div className="empty-icon">📦</div>
+                  <p>No products yet</p>
+                  <span>Add your first product to get started</span>
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -215,14 +239,29 @@ useEffect(() => {
   );
 }
 
-// 🧩 Product Slide
-function ProductSlide({ product, getProductImage }) {
+// Product Slide 
+function ProductSlideNew({ product, getProductImage, isDarkMode }) {
   const [imgSrc, setImgSrc] = useState(getProductImage(product));
 
+  const productPrice = product.price || product.variants?.[0]?.price || 0;
+
   return (
-    <div className="slide">
-      <img src={imgSrc} alt={product.name} loading="lazy" onError={() => setImgSrc("/placeholder.png")} className="fade-in" />
-      <p>{product.name}</p>
+    <div className={`slide-new ${isDarkMode ? 'dark-slide' : ''}`}>
+      <div className="product-image-container">
+        <img 
+          src={imgSrc} 
+          alt={product.name} 
+          loading="lazy" 
+          onError={() => setImgSrc("/placeholder.png")} 
+          className="product-image"
+        />
+      </div>
+      <div className="product-info">
+        <h4 className={isDarkMode ? 'dark-text' : ''}>{product.name}</h4>
+        <span className={`product-price ${isDarkMode ? 'dark-price' : ''}`}>
+          {formatCurrency(productPrice)} 
+        </span>
+      </div>
     </div>
   );
 }

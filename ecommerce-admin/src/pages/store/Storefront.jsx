@@ -145,7 +145,7 @@ export default function Storefront() {
       {/* Hero Banner */}
       <section className="mobile-hero">
         <div className="hero-content">
-          <h1 className="hero-title">Welcome to {store.name}</h1>
+          <h1 className="hero-title">Welcome to {slug}</h1>
           <p className="hero-subtitle">Discover amazing products at great prices</p>
           <div className="hero-stats">
             <div className="stat">

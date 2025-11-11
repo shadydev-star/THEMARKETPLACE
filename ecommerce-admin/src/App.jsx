@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ThemeProvider } from "./context/ThemeContext";
 
 // 🧩 Admin (Wholesaler) pages
 import AdminLayout from "./layouts/AdminLayout";
@@ -10,6 +11,8 @@ import Orders from "./pages/admin/AdminOrders";
 import Users from "./pages/admin/Users";
 import AddProduct from "./pages/admin/AddProduct";
 import EditProduct from "./pages/admin/EditProduct";
+import Profile from "./pages/admin/Profile";
+import Settings from "./pages/admin/Settings"; // NEW
 
 // 🛍️ Storefront (Customer-facing) pages
 import Storefront from "./pages/store/Storefront";
@@ -19,7 +22,7 @@ import Checkout from "./pages/store/Checkout";
 import ThankYou from "./pages/store/ThankYou";
 import CustomerOrders from "./pages/store/CustomerOrders";
 import OrderDetails from "./pages/store/OrderDetails";
-import OrderHistory from "./pages/store/OrderHistory"; // NEW
+import OrderHistory from "./pages/store/OrderHistory";
 
 // 🔐 Wholesaler Auth pages
 import SignUp from "./pages/auth/SignUp";
@@ -56,123 +59,127 @@ function AutoRedirectStorefront() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <CustomerAuthProvider>
-          <CartProvider>
-            <Routes>
-              {/* 🏠 Default route = Wholesaler login */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
+    <ThemeProvider>
+      <Router>
+        <AuthProvider>
+          <CustomerAuthProvider>
+            <CartProvider>
+              <Routes>
+                {/* 🏠 Default route = Wholesaler login */}
+                <Route path="/" element={<Navigate to="/login" replace />} />
 
-              {/* 🧭 Store auto-redirect route */}
-              <Route path="/store" element={<AutoRedirectStorefront />} />
+                {/* 🧭 Store auto-redirect route */}
+                <Route path="/store" element={<AutoRedirectStorefront />} />
 
-              {/* 🔑 Wholesaler Auth */}
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/login" element={<Login />} />
+                {/* 🔑 Wholesaler Auth */}
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/login" element={<Login />} />
 
-              {/* 🧭 Protected Admin Routes */}
-              <Route
-                path="/admin/:slug"
-                element={
-                  <PrivateRoute>
-                    <AdminLayout />
-                  </PrivateRoute>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="products" element={<Products />} />
-                <Route path="orders" element={<Orders />} />
-                <Route path="users" element={<Users />} />
-                <Route path="add-product" element={<AddProduct />} />
-                <Route path="edit-product/:id" element={<EditProduct />} />
-              </Route>
+                {/* 🧭 Protected Admin Routes */}
+                <Route
+                  path="/admin/:slug"
+                  element={
+                    <PrivateRoute>
+                      <AdminLayout />
+                    </PrivateRoute>
+                  }
+                >
+                  <Route index element={<Dashboard />} />
+                  <Route path="products" element={<Products />} />
+                  <Route path="orders" element={<Orders />} />
+                  <Route path="users" element={<Users />} />
+                  <Route path="add-product" element={<AddProduct />} />
+                  <Route path="edit-product/:id" element={<EditProduct />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} /> {/* NEW */}
+                </Route>
 
-              {/* 🛒 Storefront (Customer) Routes */}
-              <Route
-                path="/store/:slug"
-                element={
-                  <StorefrontProtectedRoute>
-                    <Storefront />
-                  </StorefrontProtectedRoute>
-                }
-              />
-              <Route
-                path="/store/:slug/product/:productId"
-                element={
-                  <StorefrontProtectedRoute>
-                    <ProductDetails />
-                  </StorefrontProtectedRoute>
-                }
-              />
-              <Route
-                path="/store/:slug/cart"
-                element={
-                  <StorefrontProtectedRoute>
-                    <Cart />
-                  </StorefrontProtectedRoute>
-                }
-              />
-              <Route
-                path="/store/:slug/checkout"
-                element={
-                  <StorefrontProtectedRoute>
-                    <Checkout />
-                  </StorefrontProtectedRoute>
-                }
-              />
-              <Route
-                path="/store/:slug/orders"
-                element={
-                  <StorefrontProtectedRoute>
-                    <CustomerOrders />
-                  </StorefrontProtectedRoute>
-                }
-              />
-              <Route
-                path="/store/:slug/orders/:orderId"
-                element={
-                  <StorefrontProtectedRoute>
-                    <OrderDetails />
-                  </StorefrontProtectedRoute>
-                }
-              />
-              <Route
-                path="/store/:slug/thank-you"
-                element={
-                  <StorefrontProtectedRoute>
-                    <ThankYou />
-                  </StorefrontProtectedRoute>
-                }
-              />
+                {/* 🛒 Storefront (Customer) Routes */}
+                <Route
+                  path="/store/:slug"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <Storefront />
+                    </StorefrontProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/store/:slug/product/:productId"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <ProductDetails />
+                    </StorefrontProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/store/:slug/cart"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <Cart />
+                    </StorefrontProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/store/:slug/checkout"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <Checkout />
+                    </StorefrontProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/store/:slug/orders"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <CustomerOrders />
+                    </StorefrontProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/store/:slug/orders/:orderId"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <OrderDetails />
+                    </StorefrontProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/store/:slug/thank-you"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <ThankYou />
+                    </StorefrontProtectedRoute>
+                  }
+                />
 
-              {/* 👤 Customer Authentication */}
-              <Route path="/store/:slug/signup" element={<CustomerSignUp />} />
-              <Route path="/store/:slug/login" element={<CustomerLogin />} />
+                {/* 👤 Customer Authentication */}
+                <Route path="/store/:slug/signup" element={<CustomerSignUp />} />
+                <Route path="/store/:slug/login" element={<CustomerLogin />} />
 
-              {/* 📋 CUSTOMER ORDER HISTORY ROUTES (NEW) */}
-              <Route
-                path="/customer/order-history"
-                element={
-                  <StorefrontProtectedRoute>
-                    <OrderHistory />
-                  </StorefrontProtectedRoute>
-                }
-              />
+                {/* 📋 CUSTOMER ORDER HISTORY ROUTES */}
+                <Route
+                  path="/customer/order-history"
+                  element={
+                    <StorefrontProtectedRoute>
+                      <OrderHistory />
+                    </StorefrontProtectedRoute>
+                  }
+                />
 
-              {/* 🚫 Catch-all for storefront */}
-              <Route path="/store/*" element={<Navigate to="/store/demo-store" replace />} />
+                {/* 🚫 Catch-all for storefront */}
+                <Route path="/store/*" element={<Navigate to="/store/demo-store" replace />} />
 
-              {/* 🚫 Catch-all for admin/wholesaler */}
-              <Route path="/admin/*" element={<Navigate to="/login" replace />} />
+                {/* 🚫 Catch-all for admin/wholesaler */}
+                <Route path="/admin/*" element={<Navigate to="/login" replace />} />
 
-              {/* 🚫 Everything else → wholesaler login */}
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </CartProvider>
-        </CustomerAuthProvider>
-      </AuthProvider>
-    </Router>
+                {/* 🚫 Everything else → wholesaler login */}
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </CartProvider>
+          </CustomerAuthProvider>
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

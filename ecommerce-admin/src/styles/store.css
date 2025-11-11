@@ -93,7 +93,7 @@
 
 /* Mobile Hero Banner */
 .mobile-hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #535c88 0%, #0b0b0c 100%);
   color: white;
   padding: 40px 20px;
   text-align: center;
@@ -110,6 +110,7 @@
   font-weight: 700;
   margin: 0 0 12px 0;
   line-height: 1.2;
+  text-transform:capitalize;
   
 }
 
@@ -397,6 +398,7 @@
 
   .mobile-hero {
     padding: 80px 20px;
+    
   }
 
   .hero-title {
@@ -522,6 +524,7 @@
   }
   .mobile-hero {
     padding: 60px 20px;
+    
   }
 
   .hero-title {
@@ -551,6 +554,7 @@
 
   .mobile-hero {
     padding: 30px 16px;
+   
   }
 
   .hero-title {

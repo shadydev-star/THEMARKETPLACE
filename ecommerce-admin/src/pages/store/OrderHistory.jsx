@@ -96,16 +96,16 @@ export default function OrderHistory() {
         <div className="orders-title-section">
           <h1 className="orders-main-title">Order History</h1>
           <div className="orders-stats">
-            <div className="stat-item">
-              <span className="stat-number">{activeOrders.length}</span>
+            <div className="order-stat-item">
+              <span className="order-stat-number">{activeOrders.length}</span>
               <span className="stat-label">Active Orders</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-number">{pastOrders.length}</span>
+            <div className="order-stat-item">
+              <span className="order-stat-number">{pastOrders.length}</span>
               <span className="stat-label">Past Orders</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-number">{orders.length}</span>
+            <div className="order-stat-item">
+              <span className="order-stat-number">{orders.length}</span>
               <span className="stat-label">Total Orders</span>
             </div>
           </div>

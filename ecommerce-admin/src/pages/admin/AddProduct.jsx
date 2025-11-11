@@ -5,10 +5,12 @@ import { db } from "../../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { uploadImage } from "../../utils/cloudinary";
 import formatCurrency from "../../utils/formatCurrency";
+import { useTheme } from "../../context/ThemeContext";
 import "../../styles/addproduct.css";
 
 export default function AddProduct() {
   const { slug } = useParams();
+  const { isDarkMode } = useTheme();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -80,7 +82,7 @@ export default function AddProduct() {
   };
 
   return (
-    <div className="addproduct-container">
+    <div className={`addproduct-container ${isDarkMode ? "dark-mode" : ""}`}>
       <h2 className="form-title">Add New Product</h2>
 
       {/* ✅ Auto-hiding Alert */}
@@ -88,7 +90,7 @@ export default function AddProduct() {
         <div
           className={`custom-alert ${
             message.type === "success" ? "success" : "error"
-          } ${showAlert ? "show" : "hide"}`}
+          } ${showAlert ? "show" : "hide"} ${isDarkMode ? "dark-mode" : ""}`}
         >
           {message.text}
         </div>
@@ -96,18 +98,19 @@ export default function AddProduct() {
 
       <form onSubmit={handleSubmit} className="addproduct-form">
         <div className="form-group">
-          <label>Product Name</label>
+          <label className={isDarkMode ? "dark-mode" : ""}>Product Name</label>
           <input
             type="text"
             placeholder="Enter product name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            className={isDarkMode ? "dark-mode" : ""}
           />
         </div>
 
         <div className="form-group">
-          <label>Price (₦)</label>
+          <label className={isDarkMode ? "dark-mode" : ""}>Price (₦)</label>
           <input
             type="number"
             placeholder="Enter price"
@@ -115,26 +118,28 @@ export default function AddProduct() {
             onChange={(e) => setPrice(e.target.value)}
             min="1"
             required
+            className={isDarkMode ? "dark-mode" : ""}
           />
           {price && (
-            <small className="price-preview">
+            <small className={`price-preview ${isDarkMode ? "dark-mode" : ""}`}>
               Preview: {formatCurrency(price)}
             </small>
           )}
         </div>
 
         <div className="form-group">
-          <label>Description</label>
+          <label className={isDarkMode ? "dark-mode" : ""}>Description</label>
           <textarea
             placeholder="Enter product description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
+            className={isDarkMode ? "dark-mode" : ""}
           />
         </div>
 
         <div className="form-group">
-          <label>Product Image</label>
+          <label className={isDarkMode ? "dark-mode" : ""}>Product Image</label>
           <input
             type="file"
             accept="image/*"
@@ -143,16 +148,21 @@ export default function AddProduct() {
               setImage(file);
               if (file) setPreview(URL.createObjectURL(file));
             }}
+            className={isDarkMode ? "dark-mode" : ""}
           />
         </div>
 
         {preview && (
-          <div className="image-preview">
+          <div className={`image-preview ${isDarkMode ? "dark-mode" : ""}`}>
             <img src={preview} alt="Preview" />
           </div>
         )}
 
-        <button type="submit" className="submit-btn" disabled={loading}>
+        <button 
+          type="submit" 
+          className={`submit-btn ${isDarkMode ? "dark-mode" : ""} ${loading ? "loading" : ""}`}
+          disabled={loading}
+        >
           {loading ? "Adding..." : "Add Product"}
         </button>
       </form>

@@ -48,17 +48,18 @@
   gap: 24px;
 }
 
-.stat-item {
+.order-stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 16px;
-  background: #f8f9fa;
+  background: #ffffff;
   border-radius: 8px;
+  color: black;
   min-width: 100px;
 }
 
-.stat-number {
+.order-stat-number {
   font-size: 24px;
   font-weight: 700;
   color: #000;
@@ -71,8 +72,7 @@
   text-align: center;
 }
 
-/* Include all the CSS from the previous implementation */
-/* ... (all the CSS from the previous response) ... */
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { collection, onSnapshot } from "firebase/firestore";
+import { useTheme } from "../../context/ThemeContext";
 import "../../styles/users.css";
 
 export default function Users() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     const customersCollection = collection(db, "customers");
@@ -31,7 +33,7 @@ export default function Users() {
     return () => unsub();
   }, [db]);
 
-  if (loading) return <p className="loading">Loading customers...</p>;
+  if (loading) return <p className={`loading ${isDarkMode ? "dark-mode" : ""}`}>Loading customers...</p>;
 
   const filteredCustomers = customers.filter(
     (c) =>
@@ -40,7 +42,7 @@ export default function Users() {
   );
 
   return (
-    <div className="users">
+    <div className={`users ${isDarkMode ? "dark-mode" : ""}`}>
       <h2>Customers</h2>
 
       {/* Search */}
@@ -50,6 +52,7 @@ export default function Users() {
           placeholder="Search by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className={isDarkMode ? "dark-mode" : ""}
         />
       </div>
 
@@ -82,7 +85,7 @@ export default function Users() {
       {/* Mobile Card View */}
       <div className="users-cards">
         {filteredCustomers.map((c) => (
-          <div className="user-card" key={c.id}>
+          <div className={`user-card ${isDarkMode ? "dark-mode" : ""}`} key={c.id}>
             <p>
               <strong>Name:</strong> {c.name || "—"}
             </p>

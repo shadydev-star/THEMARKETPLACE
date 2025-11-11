@@ -1,82 +1,231 @@
 /* src/styles/users.css */
+
 .users {
-  padding: 1rem 2rem;
-  max-width: 1000px;
+  padding: 20px;
+  max-width: 1200px;
   margin: 0 auto;
+  background: #f8fafc;
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+.users.dark-mode {
+  background: #0f172a;
+  color: #f1f5f9;
 }
 
 .users h2 {
-  margin-bottom: 1rem;
-  font-size: 1.8rem;
-  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 700;
 }
 
+.users.dark-mode h2 {
+  color: #f1f5f9;
+}
+
+/* Search */
 .users-search {
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
 
 .users-search input {
   width: 100%;
-  padding: 0.6rem 1rem;
+  max-width: 400px;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  outline: none;
-  transition: 0.2s;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: white;
+  color: #374151;
 }
 
 .users-search input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.users-search input.dark-mode {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+.users-search input.dark-mode:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.users-search input::placeholder {
+  color: #9ca3af;
+}
+
+.users-search input.dark-mode::placeholder {
+  color: #64748b;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.loading.dark-mode {
+  color: #94a3b8;
 }
 
 /* Desktop Table */
 .users-table {
   width: 100%;
   border-collapse: collapse;
-  display: table;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-.users-table th,
-.users-table td {
-  padding: 0.8rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+.users.dark-mode .users-table {
+  background: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .users-table th {
-  background-color: #f7f7f7;
+  background: #f8fafc;
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.users.dark-mode .users-table th {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-bottom-color: #334155;
+}
+
+.users-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  font-size: 14px;
+}
+
+.users.dark-mode .users-table td {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+.users-table tr:last-child td {
+  border-bottom: none;
 }
 
 .users-table tr:hover {
-  background-color: #f1f1f1;
+  background: #f8fafc;
+  transition: background 0.3s ease;
 }
 
-/* Mobile Cards */
+.users.dark-mode .users-table tr:hover {
+  background: #1e293b;
+}
+
+/* Mobile Card View */
 .users-cards {
   display: none;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .user-card {
-  background: #fff;
+  background: white;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.user-card.dark-mode {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.user-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-card.dark-mode:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .user-card p {
-  margin: 0.3rem 0;
+  margin: 8px 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+.user-card.dark-mode p {
+  color: #e2e8f0;
 }
 
 .user-card strong {
-  color: #333;
+  color: #1e293b;
+  font-weight: 600;
 }
 
-/* Loading */
-.loading {
-  text-align: center;
-  margin: 2rem 0;
-  font-size: 1.2rem;
+.user-card.dark-mode strong {
+  color: #f1f5f9;
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+  .users-table {
+    display: none;
+  }
+  
+  .users-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  
+  .users {
+    padding: 16px;
+  }
+  
+  .users h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .users-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .user-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .users {
+    padding: 12px;
+  }
+  
+  .users h2 {
+    font-size: 22px;
+  }
+  
+  .users-search input {
+    max-width: 100%;
+  }
+}

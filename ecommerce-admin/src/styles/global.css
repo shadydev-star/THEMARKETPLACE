@@ -8,9 +8,8 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f6f8;
-  color: #262e1a;
+  color: #f7faf4;
 }
-
 
 /* Table styling */
 .table {
@@ -66,4 +65,199 @@ body {
 
 .btn-danger:hover {
   background: #c82333;
+}
+
+/* ============================================= */
+/* DARK MODE STYLES - ADMIN ONLY */
+/* ============================================= */
+
+/* Only apply dark mode when inside admin layout */
+.admin-layout.dark-mode {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode body {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Apply to your admin layout */
+.admin-layout.dark-mode .admin-layout {
+  background: #0f172a;
+}
+
+.admin-layout.dark-mode .main-content {
+  background: #0f172a;
+}
+
+.admin-layout.dark-mode .content-area {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Update your existing components for dark mode */
+.admin-layout.dark-mode .orders-table-container,
+.admin-layout.dark-mode .order-card,
+.admin-layout.dark-mode .stat-card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .orders-table th {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .orders-table td {
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .order-row:hover {
+  background: #334155;
+}
+
+.admin-layout.dark-mode .search-input,
+.admin-layout.dark-mode .filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .search-input:focus,
+.admin-layout.dark-mode .filter-select:focus {
+  border-color: #3b82f6;
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+/* Dashboard dark mode styles */
+.admin-layout.dark-mode .dashboard {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .stat-card-new {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .link-card-new {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.admin-layout.dark-mode .slider-container-new {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+/* Sidebar dark mode styles */
+.admin-layout.dark-mode .admin-sidebar {
+  background: #1e293b;
+  border-right-color: #334155;
+}
+
+/* Topbar dark mode styles */
+.admin-layout.dark-mode .admin-topbar {
+  background: #1e293b;
+  border-bottom-color: #334155;
+}
+
+/* Products page dark mode styles */
+.admin-layout.dark-mode .products-container {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .product-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+/* Form elements in admin */
+.admin-layout.dark-mode .form-control {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .form-control:focus {
+  background: #1e293b;
+  border-color: #3b82f6;
+  color: #f1f5f9;
+}
+
+/* Modal dark mode styles */
+.admin-layout.dark-mode .modal-content {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .modal-header {
+  border-bottom-color: #334155;
+}
+
+.admin-layout.dark-mode .modal-footer {
+  border-top-color: #334155;
+}
+
+/* Dropdown dark mode styles */
+.admin-layout.dark-mode .dropdown-menu {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .dropdown-item {
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .dropdown-item:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+/* Card dark mode styles */
+.admin-layout.dark-mode .card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+/* Table dark mode styles for admin */
+.admin-layout.dark-mode .table {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .table th {
+  background: #334155;
+  color: #f1f5f9;
+  border-bottom-color: #475569;
+}
+
+.admin-layout.dark-mode .table td {
+  border-bottom-color: #475569;
+  color: #f1f5f9;
+}
+
+.admin-layout.dark-mode .table tr:hover {
+  background: #334155;
+}
+
+/* Button dark mode styles for admin */
+.admin-layout.dark-mode .btn-outline-secondary {
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.admin-layout.dark-mode .btn-outline-secondary:hover {
+  background: #475569;
+  border-color: #64748b;
+  color: #f1f5f9;
 }

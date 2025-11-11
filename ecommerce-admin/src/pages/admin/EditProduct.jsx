@@ -6,10 +6,12 @@ import { db } from "../../firebase";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { uploadImage } from "../../utils/cloudinary";
 import { useDropzone } from "react-dropzone";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function EditProduct() {
   const { slug, id } = useParams(); // ✅ includes wholesaler slug
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -178,11 +180,17 @@ export default function EditProduct() {
     }
   };
 
-  if (loading) return <p>Loading product...</p>;
+  if (loading) return (
+    <div className={`loading-container ${isDarkMode ? 'dark-mode' : ''}`}>
+      <div className="loading-spinner"></div>
+      <p>Loading product...</p>
+    </div>
+  );
+  
   if (!product) return null;
 
   return (
-    <div className="edit-product">
+    <div className={`edit-product ${isDarkMode ? 'dark-mode' : ''}`}>
       <h2>Edit Product ({product.name})</h2>
       <form onSubmit={handleSubmit} className="product-form">
         <label>
@@ -193,6 +201,7 @@ export default function EditProduct() {
             value={product.name || ""}
             onChange={handleChange}
             required
+            className={isDarkMode ? 'dark-mode' : ''}
           />
         </label>
 
@@ -204,6 +213,7 @@ export default function EditProduct() {
             value={product.price || ""}
             onChange={handleChange}
             required
+            className={isDarkMode ? 'dark-mode' : ''}
           />
         </label>
 
@@ -215,6 +225,7 @@ export default function EditProduct() {
             value={product.stock || ""}
             onChange={handleChange}
             readOnly={variants.length > 0} // 🔒 auto-managed if variants exist
+            className={isDarkMode ? 'dark-mode' : ''}
           />
         </label>
 
@@ -225,6 +236,7 @@ export default function EditProduct() {
             name="category"
             value={product.category || ""}
             onChange={handleChange}
+            className={isDarkMode ? 'dark-mode' : ''}
           />
         </label>
 
@@ -234,6 +246,7 @@ export default function EditProduct() {
             name="description"
             value={product.description || ""}
             onChange={handleChange}
+            className={isDarkMode ? 'dark-mode' : ''}
           />
         </label>
 
@@ -241,7 +254,7 @@ export default function EditProduct() {
         <div className="variants-section">
           <h3>Variants</h3>
           {variants.map((variant, index) => (
-            <div key={index} className="variant-row">
+            <div key={index} className={`variant-row ${isDarkMode ? 'dark-mode' : ''}`}>
               <input
                 type="text"
                 placeholder="Color"
@@ -249,6 +262,7 @@ export default function EditProduct() {
                 onChange={(e) =>
                   handleVariantChange(index, "color", e.target.value)
                 }
+                className={isDarkMode ? 'dark-mode' : ''}
               />
               <input
                 type="text"
@@ -257,6 +271,7 @@ export default function EditProduct() {
                 onChange={(e) =>
                   handleVariantChange(index, "size", e.target.value)
                 }
+                className={isDarkMode ? 'dark-mode' : ''}
               />
               <input
                 type="number"
@@ -265,6 +280,7 @@ export default function EditProduct() {
                 onChange={(e) =>
                   handleVariantChange(index, "price", e.target.value)
                 }
+                className={isDarkMode ? 'dark-mode' : ''}
               />
               <input
                 type="number"
@@ -273,8 +289,13 @@ export default function EditProduct() {
                 onChange={(e) =>
                   handleVariantChange(index, "stock", e.target.value)
                 }
+                className={isDarkMode ? 'dark-mode' : ''}
               />
-              <button type="button" onClick={() => removeVariant(index)}>
+              <button 
+                type="button" 
+                onClick={() => removeVariant(index)}
+                className={isDarkMode ? 'dark-mode' : ''}
+              >
                 Remove
               </button>
 
@@ -284,15 +305,24 @@ export default function EditProduct() {
                 onDrop={handleDrop}
                 removeImage={removeImage}
                 moveImage={moveImage}
+                isDarkMode={isDarkMode}
               />
             </div>
           ))}
-          <button type="button" onClick={addVariant}>
+          <button 
+            type="button" 
+            onClick={addVariant}
+            className={`add-variant-btn ${isDarkMode ? 'dark-mode' : ''}`}
+          >
             + Add Variant
           </button>
         </div>
 
-        <button type="submit" disabled={saving}>
+        <button 
+          type="submit" 
+          disabled={saving}
+          className={`submit-btn ${isDarkMode ? 'dark-mode' : ''} ${saving ? 'saving' : ''}`}
+        >
           {saving ? "Saving..." : "Update Product"}
         </button>
       </form>
@@ -301,7 +331,7 @@ export default function EditProduct() {
 }
 
 // 🧩 Reusable Dropzone Component
-function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage }) {
+function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage, isDarkMode }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [], "video/*": [] },
     onDrop: (files) => onDrop(variantIndex, files),
@@ -317,7 +347,10 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
   };
 
   return (
-    <div {...getRootProps()} className={`dropzone ${isDragActive ? "active" : ""}`}>
+    <div 
+      {...getRootProps()} 
+      className={`dropzone ${isDragActive ? "active" : ""} ${isDarkMode ? "dark-mode" : ""}`}
+    >
       <input {...getInputProps()} />
       <div className="dropzone-placeholder">
         {isDragActive ? "Drop here..." : "+ Add Images or Videos"}
@@ -333,7 +366,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
             )}
             <button
               type="button"
-              className="remove-img"
+              className={`remove-img ${isDarkMode ? 'dark-mode' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 removeImage(variantIndex, i, "existing");
@@ -344,6 +377,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
             <div className="reorder-controls">
               <button
                 type="button"
+                className={isDarkMode ? 'dark-mode' : ''}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleReorder("existing", i, -1);
@@ -353,6 +387,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
               </button>
               <button
                 type="button"
+                className={isDarkMode ? 'dark-mode' : ''}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleReorder("existing", i, 1);
@@ -373,7 +408,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
             )}
             <button
               type="button"
-              className="remove-img"
+              className={`remove-img ${isDarkMode ? 'dark-mode' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 removeImage(variantIndex, i, "new");
@@ -384,6 +419,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
             <div className="reorder-controls">
               <button
                 type="button"
+                className={isDarkMode ? 'dark-mode' : ''}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleReorder("new", i, -1);
@@ -393,6 +429,7 @@ function VariantDropzone({ variantIndex, variant, onDrop, removeImage, moveImage
               </button>
               <button
                 type="button"
+                className={isDarkMode ? 'dark-mode' : ''}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleReorder("new", i, 1);
